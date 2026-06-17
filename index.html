@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema Alpendre — Caso: Janela Irregular (Simulação Automática)</title>
+<style>
+:root{
+  --navy:#1a2e4a;--blue:#2d5986;--blue2:#4a7fa5;--blue-light:#e8f0f8;
+  --green:#2d7a4f;--green-light:#e8f5ee;
+  --beige:#f5f0e8;--beige2:#faf8f4;--beige3:#ede8df;
+  --red:#c0392b;--amber:#b45309;--amber-light:#fef3c7;
+  --text:#2c2c2c;--muted:#6b7280;--border:#d4cec5;
+  --chat-bg:#ece5dd;--bubble-sys:#ffffff;--bubble-usr:#d9fdd3;
+  --orange:#e67e22;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#111827;display:flex;justify-content:center;align-items:center;height:100vh;overflow:hidden;padding-right:250px;}
+
+/* ── MOLDURA DO CELULAR ── */
+.phone{
+  width:360px;height:760px;background:var(--beige);border-radius:44px;
+  overflow:hidden;box-shadow:0 0 0 10px #1f2937,0 0 0 12px #374151,0 24px 60px rgba(0,0,0,.7);
+  display:flex;flex-direction:column;flex-shrink:0;
+  zoom:var(--phone-zoom,1);
+}
+.phone-notch{background:#111827;height:36px;display:flex;align-items:center;justify-content:center;border-radius:44px 44px 0 0;flex-shrink:0;}
+.phone-notch-pill{width:100px;height:10px;background:#000;border-radius:10px;}
+
+/* ── TELAS ── */
+.screen{display:none;flex-direction:column;flex:1;overflow:hidden;}
+.screen.active{display:flex;}
+
+/* ── PORTAL ── */
+#s0{background:linear-gradient(160deg,#1a2e4a 0%,#2d5986 100%);align-items:center;justify-content:center;padding:20px;}
+.portal-card{background:var(--beige2);border-radius:20px;padding:28px 22px;width:100%;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,.3);}
+.logo-row{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;}
+.logo-svg{width:56px;height:56px;}
+.logo-name{font-size:24px;font-weight:800;color:var(--navy);line-height:1;}
+.logo-tag{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.case-banner{background:var(--amber-light);border:1.5px solid #fcd34d;border-radius:10px;padding:10px 12px;margin:12px 0;text-align:left;}
+.case-banner-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--amber);margin-bottom:4px;}
+.case-banner-text{font-size:12px;color:#92400e;line-height:1.5;}
+.sim-badge{display:inline-block;background:#6d28d9;color:white;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.5px;margin:10px 0;}
+.auto-bar{background:#e5e7eb;border-radius:4px;height:4px;margin:10px 0 0;overflow:hidden;}
+.auto-fill{height:100%;background:var(--blue);border-radius:4px;width:0%;transition:width .1s linear;}
+.portal-foot{font-size:10px;color:var(--muted);margin-top:10px;line-height:1.6;}
+
+/* ── PORTAL BUTTONS (Seção 5.1 do Relatório) ── */
+.portal-btns{display:flex;flex-direction:column;gap:8px;margin:10px 0 8px;}
+.pb{padding:10px 14px;border-radius:12px;border:none;font-size:12px;font-weight:700;display:flex;align-items:center;gap:9px;cursor:default;transition:all .35s ease;width:100%;}
+.pb-blue{background:var(--blue);color:white;}
+.pb-green{background:var(--green);color:white;}
+.pb-active{box-shadow:0 0 0 4px rgba(255,255,255,.35),0 6px 20px rgba(0,0,0,.2);transform:scale(1.03);}
+
+/* ── APP HEADER ── */
+.app-hd{height:52px;padding:0 12px;display:flex;align-items:center;gap:9px;flex-shrink:0;color:white;}
+.hd-navy{background:var(--navy);}
+.hd-green{background:var(--green);}
+.hd-mini-logo{width:26px;height:26px;flex-shrink:0;}
+.hd-name{font-size:13px;font-weight:700;}
+.hd-sub{font-size:10px;opacity:.75;margin-top:1px;}
+.hd-right{margin-left:auto;}
+.offline-pill{background:#fbbf24;color:#78350f;padding:2px 7px;border-radius:10px;font-size:9px;font-weight:700;}
+
+.prog-bar{height:3px;background:rgba(0,0,0,.1);flex-shrink:0;}
+.prog-fill{height:100%;background:#fbbf24;transition:width .6s ease;}
+
+/* ── CHAT ── */
+.chat-area{flex:1;background:var(--chat-bg);overflow-y:auto;padding:10px 10px;display:flex;flex-direction:column;gap:8px;scroll-behavior:smooth;}
+.msg-row{display:flex;gap:6px;align-items:flex-end;max-width:88%;animation:fadeUp .25s ease;}
+.msg-row.sys{align-self:flex-start;}
+.msg-row.usr{align-self:flex-end;flex-direction:row-reverse;}
+.av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.sys .av{background:var(--navy);}
+.usr .av{background:#6b7280;}
+.bbl{padding:8px 11px;border-radius:13px;font-size:12.5px;line-height:1.55;}
+.sys .bbl{background:var(--bubble-sys);border-top-left-radius:3px;box-shadow:0 1px 2px rgba(0,0,0,.1);}
+.usr .bbl{background:var(--bubble-usr);border-top-right-radius:3px;box-shadow:0 1px 2px rgba(0,0,0,.1);}
+.bbl-time{font-size:9px;color:var(--muted);margin-top:3px;text-align:right;}
+
+/* Digitando */
+.typing-bbl{padding:10px 14px;border-radius:13px;background:var(--bubble-sys);border-top-left-radius:3px;display:inline-flex;gap:4px;align-items:center;}
+.dot{width:6px;height:6px;border-radius:50%;background:#aaa;animation:bounce .9s infinite;}
+.dot:nth-child(2){animation-delay:.15s;}
+.dot:nth-child(3){animation-delay:.3s;}
+@keyframes bounce{0%,80%,100%{transform:translateY(0);}40%{transform:translateY(-5px);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── ETIQUETA DE FASE ── */
+.phase-tag{align-self:center;background:rgba(26,46,74,.08);border-radius:20px;padding:4px 12px;font-size:10px;color:var(--muted);font-weight:600;margin:4px 0;}
+
+/* ── SCREEN BODY ── */
+.screen-body{flex:1;overflow-y:auto;padding:14px;}
+.s-title{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:3px;}
+.s-sub{font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5;}
+
+/* ── DIAG CARDS ── */
+.diag-cards{display:grid;gap:9px;margin-bottom:14px;}
+.dc{background:white;border-radius:12px;padding:13px;border:2px solid var(--border);box-shadow:0 2px 6px rgba(0,0,0,.05);animation:fadeUp .3s ease;}
+.dc-hd{display:flex;align-items:center;gap:9px;margin-bottom:6px;}
+.dc-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.dc-label{font-size:9px;text-transform:uppercase;letter-spacing:.8px;font-weight:700;color:var(--muted);}
+.dc-value{font-size:12.5px;font-weight:700;color:var(--navy);margin-top:1px;}
+.dc-sub{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4;}
+.info-box{background:var(--blue-light);border:1px solid #b8d0e8;border-radius:9px;padding:10px 12px;font-size:12px;line-height:1.6;margin-bottom:12px;}
+
+/* ── PROPOSTAS ── */
+.prop-grid{display:grid;gap:10px;margin-bottom:14px;}
+.prop-card{background:white;border-radius:12px;padding:13px;border:2.5px solid var(--border);transition:all .3s;position:relative;animation:fadeUp .3s ease;}
+.prop-card.sel{border-color:var(--navy);background:#f0f5ff;}
+.prop-card.sending{border-color:var(--green);background:var(--green-light);}
+.prop-tier{display:inline-block;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;text-transform:uppercase;margin-bottom:6px;}
+.t1{background:#e9ecef;color:#495057;}
+.t2{background:#fff3cd;color:#856404;}
+.t3{background:#d1e7dd;color:#0a3622;}
+.prop-title{font-size:13px;font-weight:800;color:var(--navy);margin-bottom:5px;}
+.prop-remedy{font-size:12px;color:#166534;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:5px;}
+.prop-items li{font-size:11px;color:#495057;margin-bottom:2px;list-style:none;}
+.prop-items li::before{content:'✓ ';color:var(--green);font-weight:700;}
+.prop-legal{font-size:10px;color:var(--muted);margin-top:7px;}
+.prop-chk{position:absolute;top:10px;right:10px;width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .3s;}
+.prop-card.sel .prop-chk{background:var(--navy);border-color:var(--navy);color:white;}
+
+/* ── VISUAL LAW CARD ── */
+.vl-card{background:white;border-radius:14px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.1);margin-bottom:12px;animation:fadeUp .4s ease;}
+.vl-hd{background:var(--navy);color:white;padding:14px 16px;text-align:center;}
+.vl-hd-logo{font-size:16px;font-weight:800;letter-spacing:1px;margin-bottom:1px;}
+.vl-hd-title{font-size:11px;opacity:.8;}
+.vl-hd-num{font-size:10px;font-family:monospace;opacity:.5;margin-top:4px;}
+.vl-sec{padding:12px 16px;border-bottom:1px solid var(--beige3);}
+.vl-sec:last-child{border-bottom:none;}
+.vl-sec-title{font-size:9px;text-transform:uppercase;letter-spacing:.8px;font-weight:700;color:var(--muted);margin-bottom:8px;}
+.vl-partes{display:grid;grid-template-columns:1fr auto 1fr;gap:5px;align-items:center;text-align:center;}
+.vl-parte{background:var(--beige);border-radius:8px;padding:8px 6px;}
+.vl-parte-role{font-size:8px;text-transform:uppercase;color:var(--muted);font-weight:700;}
+.vl-parte-name{font-size:11px;font-weight:700;color:var(--navy);margin-top:1px;}
+.vl-parte-addr{font-size:9px;color:var(--muted);margin-top:1px;}
+.vl-vs{font-size:14px;font-weight:800;color:var(--muted);}
+.vl-objeto{background:var(--beige);border-radius:8px;padding:10px 12px;}
+.vl-objeto p{font-size:12px;line-height:1.55;}
+.vl-objeto .legal-tag{display:inline-block;background:var(--blue-light);color:var(--blue);padding:2px 7px;border-radius:5px;font-size:9px;font-weight:700;margin-top:5px;}
+.vl-infog{display:grid;gap:8px;}
+.vl-item{border-radius:10px;padding:11px;display:flex;align-items:center;gap:10px;}
+.vi-action{background:#dbeafe;border:1.5px solid #93c5fd;}
+.vi-money{background:#dcfce7;border:1.5px solid #86efac;}
+.vi-date{background:#e0f2fe;border:1.5px solid #7dd3fc;}
+.vi-warn{background:#fee2e2;border:1.5px solid #fca5a5;}
+.vl-item-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:white;}
+.vl-item-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin-bottom:2px;}
+.vi-action .vl-item-lbl{color:#1e40af;}
+.vi-money .vl-item-lbl{color:#166534;}
+.vi-date .vl-item-lbl{color:#075985;}
+.vi-warn .vl-item-lbl{color:#991b1b;}
+.vl-item-val{font-size:13px;font-weight:800;}
+.vi-action .vl-item-val{color:#1d4ed8;}
+.vi-money .vl-item-val{color:#15803d;}
+.vi-date .vl-item-val{color:#0369a1;}
+.vi-warn .vl-item-val{color:#dc2626;font-size:11px;font-weight:600;line-height:1.4;}
+.bc-box{background:#0f172a;border-radius:9px;padding:10px 12px;font-family:monospace;color:#22d3ee;font-size:9px;margin-top:7px;}
+.bc-lbl{color:#475569;font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;}
+.bc-hash{word-break:break-all;line-height:1.7;}
+.bc-status{display:flex;align-items:center;gap:4px;margin-top:4px;font-size:8px;color:#4ade80;}
+.bc-dot{width:5px;height:5px;border-radius:50%;background:#4ade80;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.vl-sigs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;}
+.vl-sig{padding-top:8px;border-top:1.5px solid var(--border);}
+.vl-sig-ico{font-size:14px;margin-bottom:2px;}
+.vl-sig-name{font-size:10px;font-weight:700;color:var(--navy);}
+.vl-sig-role{font-size:8px;color:var(--muted);margin-top:1px;}
+.vl-legal-foot{background:#f9f9f9;font-size:9.5px;color:var(--muted);line-height:1.7;padding:10px 16px;}
+
+/* ── RESOLUÇÃO ── */
+.acordo-banner{background:#dcfce7;border:1.5px solid #86efac;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:9px;margin-bottom:12px;animation:fadeUp .4s ease;}
+.notif-box{background:var(--green-light);border:1.5px solid #86efac;border-radius:10px;padding:12px;margin-bottom:12px;}
+.status-table td{padding:5px 0;font-size:11px;border-top:1px solid var(--beige3);}
+.status-table td:first-child{color:var(--muted);width:40%;}
+.status-table td:last-child{font-weight:700;}
+.route{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--beige);border-radius:10px;margin-bottom:8px;border:1px solid var(--border);}
+.route-icon{font-size:20px;flex-shrink:0;}
+.route-title{font-size:12px;font-weight:700;color:var(--navy);}
+.route-desc{font-size:10.5px;color:var(--muted);margin-top:2px;line-height:1.5;}
+
+/* ── MIC BAR (Módulo de Áudio — Seção 5.2 do Relatório) ── */
+.mic-bar{background:white;border-top:1px solid var(--border);padding:8px 12px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.mic-btn{width:38px;height:38px;border-radius:50%;background:var(--navy);border:none;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;position:relative;cursor:default;}
+.mic-pulse{position:absolute;width:100%;height:100%;border-radius:50%;background:var(--navy);opacity:.4;animation:micPulse 1.8s ease-out infinite;}
+@keyframes micPulse{0%{transform:scale(1);opacity:.4;}100%{transform:scale(1.9);opacity:0;}}
+.mic-wave{flex:1;height:28px;background:#f3f4f6;border-radius:20px;display:flex;align-items:center;justify-content:center;gap:3px;padding:0 12px;}
+.mic-wave span{display:inline-block;width:3px;border-radius:2px;background:#9ca3af;animation:wave 1.2s ease infinite;}
+.mic-wave span:nth-child(1){height:6px;animation-delay:0s;}
+.mic-wave span:nth-child(2){height:14px;animation-delay:.1s;}
+.mic-wave span:nth-child(3){height:20px;animation-delay:.2s;}
+.mic-wave span:nth-child(4){height:14px;animation-delay:.3s;}
+.mic-wave span:nth-child(5){height:8px;animation-delay:.4s;}
+.mic-wave span:nth-child(6){height:18px;animation-delay:.15s;}
+.mic-wave span:nth-child(7){height:10px;animation-delay:.25s;}
+@keyframes wave{0%,100%{transform:scaleY(1);}50%{transform:scaleY(1.6);}}
+.mic-label{font-size:9px;color:var(--muted);white-space:nowrap;}
+
+/* ── REPLAY BTN ── */
+.replay-btn{position:fixed;bottom:24px;right:24px;background:var(--blue);color:white;border:none;border-radius:50px;padding:12px 20px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.3);display:none;z-index:999;animation:fadeUp .3s ease;}
+.replay-btn:hover{background:var(--navy);}
+
+/* ── PAINEL LATERAL INFO (overlay fixo para apresentação) ── */
+.info-panel{
+  position:fixed;right:0;top:0;width:250px;height:100vh;
+  color:white;padding:16px;overflow-y:auto;
+  background:#111827;border-left:1px solid #1f2937;
+  z-index:200;
+}
+.info-panel h2{font-size:15px;font-weight:800;margin-bottom:6px;color:#f3f4f6;}
+.info-panel p{font-size:11px;color:#9ca3af;line-height:1.6;margin-bottom:12px;}
+.step-list{list-style:none;}
+.step-list li{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #1f2937;font-size:11px;color:#9ca3af;}
+.step-list li.done{color:#4ade80;}
+.step-list li.active{color:white;font-weight:700;}
+.step-list li .step-dot{width:7px;height:7px;border-radius:50%;background:#374151;flex-shrink:0;}
+.step-list li.done .step-dot{background:#4ade80;}
+.step-list li.active .step-dot{background:white;box-shadow:0 0 0 3px rgba(255,255,255,.2);}
+.speed-ctrl{margin-top:16px;}
+.speed-ctrl p{font-size:10px;color:#6b7280;margin-bottom:6px;}
+.speed-btn{padding:5px 10px;border-radius:6px;border:1px solid #374151;background:transparent;color:#9ca3af;font-size:11px;cursor:pointer;margin-right:4px;}
+.speed-btn.sel{background:#2d5986;color:white;border-color:#2d5986;}
+</style>
+</head>
+<body>
+
+<div class="info-panel">
+  <h2>⚖️ Sistema Alpendre</h2>
+  <p>Simulação automática completa do caso de <strong style="color:white;">janela irregular</strong> de vizinhança. Observe o diálogo acontecer em tempo real.</p>
+  <ul class="step-list" id="step-list">
+    <li id="stepv0"><span class="step-dot"></span> <span style="color:#f87171;">🔴</span> Tentativa — Violência</li>
+    <li id="stepv1"><span class="step-dot"></span> <span style="color:#f87171;">🤖</span> NLP — Recusa & Encaminhamento</li>
+    <li id="step0"><span class="step-dot"></span> Portal de Entrada</li>
+    <li id="step1"><span class="step-dot"></span> Chat — Demandante</li>
+    <li id="step2"><span class="step-dot"></span> 🤖 Filtro NLP (✅ Admitido)</li>
+    <li id="step3"><span class="step-dot"></span> Cards Diagnósticos</li>
+    <li id="step4"><span class="step-dot"></span> Propostas de Acordo</li>
+    <li id="step5"><span class="step-dot"></span> Notificação Enviada</li>
+    <li id="step6"><span class="step-dot"></span> Jornada do Demandado</li>
+    <li id="step7"><span class="step-dot"></span> Resolução Final</li>
+  </ul>
+  <div style="background:#1f2937;border-radius:8px;padding:11px 12px;margin-bottom:14px;">
+    <div style="display:inline-block;background:#6d28d9;color:white;padding:3px 10px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.5px;margin-bottom:8px;">▶ SIMULAÇÃO AUTOMÁTICA</div>
+    <div style="font-size:10px;font-weight:700;color:#fbbf24;margin-bottom:3px;">🏗️ Caso Simulado</div>
+    <div style="font-size:10px;color:#9ca3af;line-height:1.6;">Vizinho construiu janela voltada ao quintal do demandante.<br><span style="color:#d1d5db;font-weight:600;">Base:</span> Art. 1.301 do Código Civil.</div>
+    <div style="margin-top:10px;">
+      <div style="font-size:9px;color:#6b7280;margin-bottom:4px;">Progresso:</div>
+      <div class="auto-bar" style="background:#374151;"><div class="auto-fill" id="portal-fill"></div></div>
+    </div>
+  </div>
+
+  <button id="start-btn" onclick="iniciarSim()" style="width:100%;padding:12px;border-radius:10px;border:none;background:#2d5986;color:white;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:14px;letter-spacing:.3px;transition:background .2s;">
+    ▶ Iniciar Simulação
+  </button>
+
+  <p style="margin-top:16px;font-size:10px;color:#4b5563;">Art. 1.301 CC · Lei 13.140/2015<br>Res. CNJ 347/2020 · Visual Law</p>
+</div>
+
+<!-- MOLDURA CELULAR -->
+<div class="phone">
+  <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+
+  <!-- TELA sv — CENÁRIO DE VIOLÊNCIA (NLP recusa) -->
+  <div class="screen" id="sv">
+    <div class="chat-header" style="background:#7f1d1d;">
+      <div class="av" style="background:#991b1b;">🏠</div>
+      <div><div class="chat-title">Alpendre · Micro-ODR</div><div class="chat-sub">Início de sessão</div></div>
+    </div>
+    <div class="chat-area" id="chatv" style="background:var(--chat-bg);"></div>
+    <div class="mic-bar">
+      <div class="mic-icon">🎙</div>
+      <div class="mic-hint">Toque para falar ou escrever</div>
+    </div>
+  </div>
+
+  <!-- TELA 0 — PORTAL -->
+  <div class="screen active" id="s0">
+    <div style="flex:1;background:linear-gradient(160deg,#1a2e4a 0%,#2d5986 100%);display:flex;align-items:center;justify-content:center;padding:16px;">
+      <div class="portal-card">
+        <div class="logo-row">
+          <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- Fundo creme -->
+            <circle cx="50" cy="50" r="48" fill="#f5f0e8"/>
+            <!-- Bordas douradas -->
+            <circle cx="50" cy="50" r="46.5" fill="none" stroke="#c9922a" stroke-width="1.5"/>
+            <circle cx="50" cy="50" r="43.5" fill="none" stroke="#c9922a" stroke-width="0.5"/>
+            <!-- Ornamentos cardinais (folhas douradas) -->
+            <path d="M50,3.5 C47.5,5.5 46,7.5 50,8.5 C54,7.5 52.5,5.5 50,3.5Z" fill="#c9922a"/>
+            <circle cx="50" cy="9.5" r="1.3" fill="#c9922a"/>
+            <path d="M50,96.5 C47.5,94.5 46,92.5 50,91.5 C54,92.5 52.5,94.5 50,96.5Z" fill="#c9922a"/>
+            <circle cx="50" cy="90.5" r="1.3" fill="#c9922a"/>
+            <path d="M3.5,50 C5.5,47.5 7.5,46 8.5,50 C7.5,54 5.5,52.5 3.5,50Z" fill="#c9922a"/>
+            <circle cx="9.5" cy="50" r="1.3" fill="#c9922a"/>
+            <path d="M96.5,50 C94.5,47.5 92.5,46 91.5,50 C92.5,54 94.5,52.5 96.5,50Z" fill="#c9922a"/>
+            <circle cx="90.5" cy="50" r="1.3" fill="#c9922a"/>
+            <!-- Ornamentos diagonais -->
+            <circle cx="10.5" cy="10.5" r="2" fill="none" stroke="#c9922a" stroke-width="1"/>
+            <circle cx="89.5" cy="10.5" r="2" fill="none" stroke="#c9922a" stroke-width="1"/>
+            <circle cx="10.5" cy="89.5" r="2" fill="none" stroke="#c9922a" stroke-width="1"/>
+            <circle cx="89.5" cy="89.5" r="2" fill="none" stroke="#c9922a" stroke-width="1"/>
+            <!-- Grama -->
+            <ellipse cx="50" cy="64" rx="27" ry="4.5" fill="#6aac46"/>
+            <!-- Telhado (terracota) -->
+            <polygon points="36,17 64,17 83,40 17,40" fill="#c0553a"/>
+            <line x1="36" y1="17" x2="64" y2="17" stroke="#8a3520" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="19" y1="25" x2="81" y2="25" stroke="#a0432a" stroke-width="0.9"/>
+            <line x1="18" y1="32" x2="82" y2="32" stroke="#a0432a" stroke-width="0.9"/>
+            <line x1="17" y1="39" x2="83" y2="39" stroke="#a0432a" stroke-width="0.9"/>
+            <!-- Pilares -->
+            <rect x="19" y="40" width="5" height="24" rx="1" fill="#7c4f28"/>
+            <rect x="76" y="40" width="5" height="24" rx="1" fill="#7c4f28"/>
+            <!-- Banco -->
+            <rect x="36" y="50" width="28" height="2" rx="0.8" fill="#7c4f28"/>
+            <rect x="34" y="54" width="32" height="3" rx="1" fill="#8B5E3C"/>
+            <rect x="37" y="57" width="2.5" height="5" fill="#7c4f28"/>
+            <rect x="60.5" y="57" width="2.5" height="5" fill="#7c4f28"/>
+            <!-- Figura esquerda (âmbar) — inclinada para direita, braço estendido -->
+            <circle cx="30" cy="36" r="4.5" fill="#c8852a"/>
+            <path d="M30,40.5 Q33,51 31,61" stroke="#c8852a" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M32,47 Q40,43.5 44,46" stroke="#c8852a" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M32,47 Q24,49 21,52" stroke="#c8852a" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M31,61 Q27,66 25,68" stroke="#c8852a" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M31,61 Q33,66 33,69" stroke="#c8852a" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <!-- Figura direita (azul) — inclinada para esquerda, braço estendido + braço no pilar -->
+            <circle cx="70" cy="36" r="4.5" fill="#4a7fa5"/>
+            <path d="M70,40.5 Q67,51 69,61" stroke="#4a7fa5" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M68,47 Q60,43.5 56,46" stroke="#4a7fa5" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M68,47 Q75,43 78,40" stroke="#4a7fa5" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M69,61 Q73,66 75,68" stroke="#4a7fa5" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M69,61 Q67,66 67,69" stroke="#4a7fa5" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+          <div><div class="logo-name">Alpendre</div><div class="logo-tag">Acolhimento e Resolução Comunitária</div></div>
+        </div>
+        <p style="font-size:12px;color:var(--muted);text-align:center;margin:10px 0 16px;line-height:1.65;">
+          Resolva pequenos conflitos do dia a dia por negociação assistida — sem tribunais, sem custas e sem sair de casa.
+        </p>
+        <div class="portal-btns">
+          <button class="pb pb-blue" id="pb-blue">🤝 Quero fazer um acordo</button>
+          <button class="pb pb-green" id="pb-green">✉️ Fui convidado para um acordo</button>
+        </div>
+        <div class="portal-foot">🔒 Sessão sigilosa · Offline-First<br>Lei 13.140/2015 · Res. CNJ 347/2020</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TELA 1 — CHAT -->
+  <div class="screen" id="s1">
+    <div class="app-hd hd-navy">
+      <svg class="hd-mini-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="48" fill="#f5f0e8" stroke="white" stroke-width="3"/><polygon points="18,48 50,22 82,48" fill="#1a2e4a"/><rect x="24" y="48" width="52" height="28" rx="2" fill="#2d5986"/><rect x="38" y="55" width="24" height="21" rx="3" fill="#f5f0e8"/><path d="M43 67 Q50 72 57 67" stroke="#fbbf24" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      <div><div class="hd-name">Assistente Alpendre</div><div class="hd-sub">● online · sessão sigilosa</div></div>
+      <div class="hd-right"><span class="offline-pill">📱 Offline-First</span></div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="prog1" style="width:10%"></div></div>
+    <div class="chat-area" id="chat"></div>
+    <!-- Barra de microfone pulsante — Seção 5.2 do Relatório Alpendre -->
+    <div class="mic-bar">
+      <div class="mic-btn">
+        <div class="mic-pulse"></div>
+        🎙️
+      </div>
+      <div class="mic-wave">
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div class="mic-label">Relato por áudio<br>disponível</div>
+    </div>
+  </div>
+
+  <!-- TELA 2 — CARDS -->
+  <div class="screen" id="s2">
+    <div class="app-hd hd-navy">
+      <div><div class="hd-name">Diagnóstico do Caso</div><div class="hd-sub">Gerado pelo Assistente</div></div>
+      <div class="hd-right"><span class="offline-pill">📱 Offline-First</span></div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" style="width:45%"></div></div>
+    <div class="screen-body">
+      <div class="s-title">📋 Caso organizado</div>
+      <p class="s-sub">Três cards com o diagnóstico completo.</p>
+      <div class="diag-cards" id="diag-cards"></div>
+      <div class="info-box">⚖️ <strong>Art. 1.301 do CC</strong> — É defeso abrir janelas a menos de <strong>1,5 metro</strong> da divisa do terreno vizinho. A obra é irregular e sujeita a embargo judicial.</div>
+    </div>
+  </div>
+
+  <!-- TELA 3 — PROPOSTAS -->
+  <div class="screen" id="s3">
+    <div class="app-hd hd-navy">
+      <div><div class="hd-name">Propostas de Acordo</div><div class="hd-sub">Geradas pelo Alpendre · Art. 1.301 CC</div></div>
+      <div class="hd-right"><span class="offline-pill">📱 Offline-First</span></div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" style="width:60%"></div></div>
+    <div class="screen-body">
+      <div class="s-title">🧠 3 propostas disponíveis</div>
+      <p class="s-sub">Selecionando a mais adequada ao caso...</p>
+      <div class="prop-grid" id="prop-grid">
+
+        <div class="prop-card" id="pc1">
+          <div class="prop-chk" id="chk1"></div>
+          <div class="prop-tier t1">⚪ Básica</div>
+          <div class="prop-title">Solução Rápida — Proteção Visual</div>
+          <div class="prop-remedy">🔒 Instalação de película opaca na janela</div>
+          <ul class="prop-items"><li>Película fumê 100% opaca</li><li>Prazo: 7 dias úteis</li><li>Sem custo em dinheiro</li></ul>
+          <div class="prop-legal">⚖️ Art. 1.302 CC</div>
+        </div>
+
+        <div class="prop-card" id="pc2">
+          <div class="prop-chk" id="chk2"></div>
+          <div class="prop-tier t2">🟡 Intermediária</div>
+          <div class="prop-title">Fechamento + Compensação</div>
+          <div class="prop-remedy">🧱 Fechamento definitivo + R$ 800,00</div>
+          <ul class="prop-items"><li>Fechamento permanente da janela</li><li>Compensação de R$ 800,00</li><li>Prazo: 15 dias corridos</li></ul>
+          <div class="prop-legal">⚖️ Art. 1.301 c/c Art. 1.277 CC</div>
+        </div>
+
+        <div class="prop-card" id="pc3">
+          <div class="prop-chk" id="chk3"></div>
+          <div class="prop-tier t3">🟢 Ampliada</div>
+          <div class="prop-title">Restauração Integral</div>
+          <div class="prop-remedy">🏗️ Adequação da obra + R$ 2.000 danos morais</div>
+          <ul class="prop-items"><li>Realocação/fechamento da janela</li><li>R$ 2.000,00 indenização</li><li>Prazo: 20 dias + ART</li></ul>
+          <div class="prop-legal">⚖️ Art. 1.301 c/c Art. 186 c/c Art. 927 CC</div>
+        </div>
+
+      </div>
+      <div id="envio-status" style="font-size:11px;color:var(--muted);text-align:center;margin-top:4px;"></div>
+    </div>
+  </div>
+
+  <!-- TELA 4 — NOTIFICAÇÃO -->
+  <div class="screen" id="s4">
+    <div class="app-hd hd-navy">
+      <div><div class="hd-name">Notificação Enviada</div><div class="hd-sub">Aguardando resposta</div></div>
+      <div class="hd-right"><span class="offline-pill">📱 Offline-First</span></div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" style="width:72%"></div></div>
+    <div class="screen-body">
+      <div class="notif-box" style="background:#dcfce7;border-color:#86efac;">
+        <div style="display:flex;gap:9px;align-items:flex-start;">
+          <span style="font-size:22px;">✅</span>
+          <div><strong style="color:#166534;font-size:13px;">Proposta encaminhada com sucesso</strong><br><span style="font-size:11px;color:#166534;">Roberto Alves Lima foi notificado de forma amigável.</span></div>
+        </div>
+      </div>
+      <div style="background:white;border-radius:10px;padding:12px;margin-bottom:12px;border:1px solid var(--border);">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px;">📋 Comprovante</div>
+        <table class="status-table" style="width:100%;border-collapse:collapse;">
+          <tr><td>Processo nº</td><td id="notif-proc" style="font-family:monospace;font-size:10px;">—</td></tr>
+          <tr><td>Demandante</td><td>Carlos Eduardo Fonseca</td></tr>
+          <tr><td>Demandado</td><td>Roberto Alves Lima</td></tr>
+          <tr><td>Enviado em</td><td id="notif-data">—</td></tr>
+          <tr><td>Prazo</td><td>10 dias corridos</td></tr>
+          <tr><td>Status</td><td><span style="background:#dcfce7;color:#166534;padding:2px 7px;border-radius:8px;font-size:10px;font-weight:700;">✓ Entregue</span></td></tr>
+        </table>
+      </div>
+      <div style="background:var(--amber-light);border:1.5px solid #fcd34d;border-radius:10px;padding:11px 13px;display:flex;gap:9px;align-items:center;">
+        <span style="font-size:18px;">🔔</span>
+        <div><div style="font-size:12px;font-weight:700;color:var(--amber);">Roberto respondeu</div><div style="font-size:11px;color:#92400e;margin-top:1px;">Carregando manifestação...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TELA 4b — PORTAL DO DEMANDADO -->
+  <div class="screen" id="s4b">
+    <div style="flex:1;background:linear-gradient(160deg,#1a2e4a 0%,#2d5986 100%);display:flex;align-items:center;justify-content:center;padding:16px;">
+      <div class="portal-card">
+
+        <!-- Notificação de convite -->
+        <div style="background:#dcfce7;border:1.5px solid #86efac;border-radius:10px;padding:8px 12px;margin-bottom:12px;display:flex;align-items:center;gap:9px;">
+          <span style="font-size:20px;">🔔</span>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:#166534;">Você foi convidado para um acordo</div>
+            <div style="font-size:10px;color:#166534;margin-top:1px;">Carlos Eduardo Fonseca te enviou uma proposta</div>
+          </div>
+        </div>
+
+        <div class="logo-row">
+          <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- Fundo creme -->
+            <circle cx="50" cy="50" r="48" fill="#f5f0e8"/>
+            <!-- Bordas douradas -->
+            <circle cx="50" cy="50" r="46.5" fill="none" stroke="#c9922a" stroke-width="1.5"/>
+            <circle cx="50" cy="50" r="43.5" fill="none" stroke="#c9922a" stroke-width="0.5"/>
+            <!-- Ornamentos cardinais (folhas douradas) -->
+            <path d="M50,3.5 C47.5,5.5 46,7.5 50,8.5 C54,7.5 52.5,5.5 50,3.5Z" fill="#c9922a"/>
+            <circle cx="50" cy="9.5" r="1.3" fill="#c9922a"/>
+            <path d="M50,96.5 C47.5,94.5 46,92.5 50,91.5 C54,92.5 52.5,94.5 50,96.5Z" fill="#c9922a"/>
+            <circle cx="50" cy="90.5" r="1.3" fill="#c9922a"/>
+            <path d="M3.5,50 C5.5,47.5 7.5,46 8.5,50 C7.5,54 5.5,52.5 3.5,50Z" fill="#c9922a"/>
+            <circle cx="9.5" cy="50" r="1.3" fill="#c9922a"/>
+            <path d="M96.5,50 C94.5,47.5 92.5,46 91.5,50 C92.5,54 94.5,52.5 96.5,50Z" fill="#c9922a"/>
+            <circle cx="90.5" cy="50" r="1.3" fill="#c9922a"/>
+            <!-- Ornamentos diagonais -->
+            <circle cx="10.5" cy="10.5" r="2" fill="none" stroke="#c9922a" stroke-width="1"/>
+            <circle cx="89.5" cy="10.5" r="2" fill="none" stroke="#c9922a" stroke-width="1"/>
+            <circle cx="10.5" cy="89.5" r="2" fill="none" stroke="#c9922a" stroke-width="1"/>
+            <circle cx="89.5" cy="89.5" r="2" fill="none" stroke="#c9922a" stroke-width="1"/>
+            <!-- Grama -->
+            <ellipse cx="50" cy="64" rx="27" ry="4.5" fill="#6aac46"/>
+            <!-- Telhado (terracota) -->
+            <polygon points="36,17 64,17 83,40 17,40" fill="#c0553a"/>
+            <line x1="36" y1="17" x2="64" y2="17" stroke="#8a3520" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="19" y1="25" x2="81" y2="25" stroke="#a0432a" stroke-width="0.9"/>
+            <line x1="18" y1="32" x2="82" y2="32" stroke="#a0432a" stroke-width="0.9"/>
+            <line x1="17" y1="39" x2="83" y2="39" stroke="#a0432a" stroke-width="0.9"/>
+            <!-- Pilares -->
+            <rect x="19" y="40" width="5" height="24" rx="1" fill="#7c4f28"/>
+            <rect x="76" y="40" width="5" height="24" rx="1" fill="#7c4f28"/>
+            <!-- Banco -->
+            <rect x="36" y="50" width="28" height="2" rx="0.8" fill="#7c4f28"/>
+            <rect x="34" y="54" width="32" height="3" rx="1" fill="#8B5E3C"/>
+            <rect x="37" y="57" width="2.5" height="5" fill="#7c4f28"/>
+            <rect x="60.5" y="57" width="2.5" height="5" fill="#7c4f28"/>
+            <!-- Figura esquerda (âmbar) — inclinada para direita, braço estendido -->
+            <circle cx="30" cy="36" r="4.5" fill="#c8852a"/>
+            <path d="M30,40.5 Q33,51 31,61" stroke="#c8852a" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M32,47 Q40,43.5 44,46" stroke="#c8852a" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M32,47 Q24,49 21,52" stroke="#c8852a" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M31,61 Q27,66 25,68" stroke="#c8852a" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M31,61 Q33,66 33,69" stroke="#c8852a" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <!-- Figura direita (azul) — inclinada para esquerda, braço estendido + braço no pilar -->
+            <circle cx="70" cy="36" r="4.5" fill="#4a7fa5"/>
+            <path d="M70,40.5 Q67,51 69,61" stroke="#4a7fa5" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M68,47 Q60,43.5 56,46" stroke="#4a7fa5" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M68,47 Q75,43 78,40" stroke="#4a7fa5" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M69,61 Q73,66 75,68" stroke="#4a7fa5" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M69,61 Q67,66 67,69" stroke="#4a7fa5" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+          <div><div class="logo-name">Alpendre</div><div class="logo-tag">Acolhimento e Resolução Comunitária</div></div>
+        </div>
+
+        <p style="font-size:12px;color:var(--muted);text-align:center;margin:10px 0 16px;line-height:1.65;">
+          Resolva pequenos conflitos do dia a dia por negociação assistida — sem tribunais, sem custas e sem sair de casa.
+        </p>
+
+        <div class="portal-btns">
+          <button class="pb pb-blue" id="pb-blue-dem">🤝 Quero fazer um acordo</button>
+          <button class="pb pb-green" id="pb-green-dem">✉️ Fui convidado para um acordo</button>
+        </div>
+
+        <div class="portal-foot">🔒 Sessão sigilosa · Offline-First<br>Lei 13.140/2015 · Res. CNJ 347/2020</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TELA 5 — DEMANDADO (chat) -->
+  <div class="screen" id="s5">
+    <div class="app-hd hd-green">
+      <svg class="hd-mini-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="48" fill="#f5f0e8" stroke="white" stroke-width="3"/><polygon points="18,48 50,22 82,48" fill="#1a2e4a"/><rect x="24" y="48" width="52" height="28" rx="2" fill="#2d5986"/><rect x="38" y="55" width="24" height="21" rx="3" fill="#f5f0e8"/><path d="M43 67 Q50 72 57 67" stroke="#fbbf24" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      <div><div class="hd-name">Roberto Alves Lima</div><div class="hd-sub">Demandado · Rua das Acácias, 47</div></div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" style="width:85%"></div></div>
+    <div class="chat-area" id="chat2"></div>
+  </div>
+
+  <!-- TELA 6 — RESOLUÇÃO -->
+  <div class="screen" id="s6">
+    <div class="app-hd hd-navy">
+      <div><div class="hd-name">Resolução Final</div><div class="hd-sub">Caso: Janela Irregular</div></div>
+      <div class="hd-right"><span class="offline-pill">📱 Offline-First</span></div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
+    <div class="screen-body" id="s6-body"></div>
+  </div>
+
+</div><!-- /phone -->
+
+<button class="replay-btn" id="replay-btn" onclick="location.reload()">↺ Reiniciar simulação</button>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// CONTROLE GERAL
+// ══════════════════════════════════════════════════════════
+let SPEED = 0.5; // padrão: modo plateia
+let procNum = '', hashVal = '';
+
+const genProc = () => {
+  const n = Math.floor(Math.random()*900000)+100000;
+  const y = new Date().getFullYear();
+  return `${n}-${Math.floor(Math.random()*9)+1}.${y}.8.26.0001`;
+};
+const genHash = () => {
+  const c='abcdef0123456789'; let h='';
+  for(let i=0;i<64;i++) h+=c[Math.floor(Math.random()*c.length)];
+  return h;
+};
+const now = () => new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+const fullNow = () => new Date().toLocaleString('pt-BR');
+const todayFull = () => new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+
+function setSpeed(s){
+  SPEED = s;
+  document.querySelectorAll('.speed-btn').forEach(b=>b.classList.remove('sel'));
+  if(s===2) document.querySelector('.speed-btn:nth-child(1)').classList.add('sel');
+  else if(s===1) document.querySelector('.speed-btn:nth-child(2)').classList.add('sel');
+  else document.querySelector('.speed-btn:nth-child(3)').classList.add('sel');
+}
+
+const wait = ms => new Promise(r => setTimeout(r, ms / SPEED));
+
+function goScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function setStep(n){
+  document.querySelectorAll('#step-list li').forEach((li,i)=>{
+    li.classList.remove('active','done');
+    if(i<n) li.classList.add('done');
+    else if(i===n) li.classList.add('active');
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// CHAT HELPERS
+// ══════════════════════════════════════════════════════════
+function showTyping(container, delay=0){
+  return new Promise(async res => {
+    await wait(delay);
+    const row = document.createElement('div');
+    row.className = 'msg-row sys';
+    row.id = 'typing-indicator';
+    row.innerHTML = `<div class="av">🏠</div><div class="typing-bbl"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>`;
+    container.appendChild(row);
+    container.scrollTop = container.scrollHeight;
+    res();
+  });
+}
+function removeTyping(container){
+  const el = container.querySelector('#typing-indicator');
+  if(el) el.remove();
+}
+
+async function sysMsg(container, html, typingMs=900, delayBefore=300){
+  await wait(delayBefore);
+  await showTyping(container);
+  await wait(typingMs);
+  removeTyping(container);
+  const row = document.createElement('div');
+  row.className = 'msg-row sys';
+  row.innerHTML = `<div class="av">🏠</div><div><div class="bbl">${html}<div class="bbl-time">${now()}</div></div></div>`;
+  container.appendChild(row);
+  container.scrollTop = container.scrollHeight;
+  await wait(200);
+}
+
+async function usrMsg(container, text, av='👤', delay=600){
+  await wait(delay);
+  const row = document.createElement('div');
+  row.className = 'msg-row usr';
+  row.innerHTML = `<div class="av">${av}</div><div><div class="bbl">${text}<div class="bbl-time">${now()}</div></div></div>`;
+  container.appendChild(row);
+  container.scrollTop = container.scrollHeight;
+  await wait(300);
+}
+
+async function phaseTag(container, text, delay=200){
+  await wait(delay);
+  const el = document.createElement('div');
+  el.className = 'phase-tag';
+  el.textContent = text;
+  container.appendChild(el);
+  container.scrollTop = container.scrollHeight;
+}
+
+// ══════════════════════════════════════════════════════════
+// FLUXO PRINCIPAL — alinhado à Seção 5 do Relatório Alpendre
+// ══════════════════════════════════════════════════════════
+async function run(){
+  procNum = genProc();
+  hashVal = genHash();
+
+  // ── PORTAL INICIAL — usuário abre o Alpendre ────────────
+  setStep(0);
+  goScreen('s0');
+
+  // Após 2s: demandante toca "Quero fazer um acordo" (caso violência)
+  await wait(2000);
+  const pbViol = document.getElementById('pb-blue');
+  if(pbViol) pbViol.classList.add('pb-active');
+  await wait(2000);
+  if(pbViol) pbViol.classList.remove('pb-active');
+  await wait(400);
+
+  // ── CENÁRIO 1 — VIOLÊNCIA (NLP recusa) ───────────────────
+  goScreen('sv');
+  const chatv = document.getElementById('chatv');
+
+  await phaseTag(chatv, '— Cenário 1 · Tentativa Recusada —');
+
+  await sysMsg(chatv,
+    `Olá! Bem-vindo ao Alpendre 🌿<br>
+     Antes de iniciar — há alguma situação de <strong>violência, ameaça ou crime</strong> envolvida?`,
+    900, 300);
+
+  await usrMsg(chatv,
+    'Sim! Esse vizinho invadiu minha casa, me ameaçou com uma faca e vai voltar. Ele é perigoso e eu tenho medo pelo que pode acontecer!',
+    1200, 600);
+
+  // ── NLP DETECTA VIOLÊNCIA ────────────────────────────────
+  setStep(1);
+
+  await phaseTag(chatv, '— 🤖 Módulo NLP — Triagem de Admissibilidade —');
+
+  await sysMsg(chatv,
+    `<div style="background:#fef2f2;border:2px solid #fca5a5;border-radius:9px;padding:10px 12px;margin-bottom:5px;">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#dc2626;margin-bottom:7px;">🤖 NLP — Análise de Admissibilidade</div>
+      <div style="font-size:11.5px;color:#991b1b;line-height:1.9;">
+        ⛔ Indicador de <strong>violência física detectado</strong><br>
+        ⛔ Indicador de <strong>ameaça com arma</strong> identificado<br>
+        ⛔ Risco à integridade pessoal — caso <strong>INADMITIDO</strong>
+      </div>
+    </div>`,
+    1600, 400);
+
+  await sysMsg(chatv,
+    `<strong>Sua segurança é a prioridade.</strong> Este caso envolve risco pessoal e não pode ser tratado pela plataforma.<br><br>
+    <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:9px;padding:10px 12px;margin-top:4px;">
+      <div style="font-size:10px;font-weight:700;color:#c2410c;margin-bottom:8px;">📞 Encaminhamento Imediato</div>
+      <div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid #fed7aa;">
+        <span style="font-size:16px;">🚨</span>
+        <div style="font-size:11px;color:#7c2d12;"><strong>190</strong> — Polícia Militar (emergência)</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid #fed7aa;">
+        <span style="font-size:16px;">🏥</span>
+        <div style="font-size:11px;color:#7c2d12;"><strong>192</strong> — SAMU (socorro médico)</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:4px 0;">
+        <span style="font-size:16px;">🛡️</span>
+        <div style="font-size:11px;color:#7c2d12;"><strong>180</strong> — Central de Atendimento à Mulher</div>
+      </div>
+    </div>`,
+    1800, 500);
+
+  await sysMsg(chatv,
+    `<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:9px;padding:9px 12px;font-size:11px;color:#166534;">
+      ℹ️ O Alpendre atua em pequenos conflitos passíveis de resolução por negociação, desde que envolvam direitos disponíveis. Casos com violência, ameaça ou prática de crimes são encaminhados às autoridades competentes (Art. 5º, caput, CF/88 · Lei 13.140/2015, art. 3º).
+    </div>`,
+    1400, 400);
+
+  await wait(3500);
+
+  // ── SEPARADOR VISUAL: transição para o caso admitido ─────
+  await phaseTag(chatv, '— Agora veja um caso admitido pelo sistema! —');
+  await wait(2500);
+
+  // ── PORTAL (Seção 5.1) — Caso Admitido ─────────────────
+  setStep(2);
+  goScreen('s0');
+  // Garante que o botão azul não está destacado antes de reiniciar
+  const pbMain = document.getElementById('pb-blue');
+  if(pbMain) pbMain.classList.remove('pb-active');
+  // Reseta e reinicia a barra de progresso
+  const fill = document.getElementById('portal-fill');
+  fill.style.width = '0%';
+  let pct = 0;
+  const fillInterval = setInterval(()=>{ pct+=2; fill.style.width=pct+'%'; if(pct>=100) clearInterval(fillInterval); }, 80/SPEED);
+
+  // Após 2s: destaca o botão azul — demandante seleciona "Quero fazer um acordo"
+  setTimeout(()=>{
+    if(pbMain) pbMain.classList.add('pb-active');
+  }, 2000/SPEED);
+
+  await wait(4500);
+
+  // ── TELA 1 — DEMANDANTE · "O Desabafo" (Seção 5.2) ─────
+  setStep(3);
+  goScreen('s1');
+  const chat = document.getElementById('chat');
+
+  await phaseTag(chat, '— Início da Sessão · Carlos Eduardo Fonseca —');
+
+  await sysMsg(chat,
+    `Olá, <strong>Carlos Eduardo</strong>! Bem-vindo ao Alpendre 🌿<br>
+     Este é um espaço seguro e sigiloso. Vou te ajudar a resolver a situação com seu vizinho.<br><br>
+     Antes de tudo — há alguma situação de <strong>violência, ameaça ou crime</strong> envolvida?`,
+    1400, 700);
+  document.getElementById('prog1').style.width='15%';
+
+  await usrMsg(chat, '❌ Não. É um problema de construção e privacidade', '👤', 900);
+
+  // ── FILTRO NLP — ADMISSIBILIDADE (Seção 3.2) ────────────
+  setStep(4);
+  await phaseTag(chat, '— 🤖 Módulo NLP — Triagem de Admissibilidade —');
+  await sysMsg(chat,
+    `<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:9px;padding:10px 12px;margin-bottom:5px;">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#166534;margin-bottom:7px;">🤖 NLP — Análise de Admissibilidade</div>
+      <div style="font-size:11.5px;color:#166534;line-height:1.9;">
+        ✅ Sem indicadores de violência<br>
+        ✅ Sem palavras-chave de crime grave<br>
+        ✅ Conflito interpessoal — direito disponível<br>
+        ✅ Caso <strong>ADMITIDO</strong> para Micro-ODR
+      </div>
+    </div>
+    Seu caso é <strong>plenamente adequado</strong> ao Alpendre. Pode continuar com segurança. 🌿`,
+    1400, 500);
+  document.getElementById('prog1').style.width='25%';
+
+  await wait(1200);
+
+  await sysMsg(chat,
+    `Certo. Então vamos com calma. 😊<br><br>
+     A <strong>janela</strong> que seu vizinho construiu — a quantos metros ela fica da divisa do seu terreno?`,
+    1200, 600);
+  document.getElementById('prog1').style.width='35%';
+
+  await usrMsg(chat, '📏 Menos de 1 metro da divisa', '👤', 1000);
+
+  await sysMsg(chat,
+    `Entendido. O <strong>Art. 1.301 do Código Civil</strong> é claro: nenhuma janela pode ser aberta a menos de <strong>1,5 metro</strong> da divisa do vizinho. A obra é <strong>irregular</strong>. 📐<br><br>
+     O que essa janela dá vista para o seu quintal?`,
+    1500, 600);
+  document.getElementById('prog1').style.width='48%';
+
+  await usrMsg(chat, '🏡 Quintal em geral — toda a minha família fica exposta', '👤', 1000);
+
+  await sysMsg(chat,
+    `Isso é sério. A exposição de toda a família sem consentimento viola diretamente sua <strong>privacidade</strong> e a do seu lar.<br><br>
+     Antes do Alpendre — você <strong>já tentou conversar</strong> com seu vizinho?`,
+    1300, 600);
+  document.getElementById('prog1').style.width='62%';
+
+  await usrMsg(chat, '🗣️ Sim, ele sabe mas não quis resolver', '👤', 1000);
+
+  await sysMsg(chat,
+    `A recusa dele, mesmo ciente do problema, <strong>fortalece sua posição</strong> no procedimento.<br><br>
+     O que você espera como <strong>solução</strong>?`,
+    1200, 600);
+  document.getElementById('prog1').style.width='76%';
+
+  await usrMsg(chat, '🧱 Que ele feche definitivamente a janela + me pague pelos transtornos', '👤', 1000);
+
+  await sysMsg(chat,
+    `Perfeito, Carlos Eduardo! Tenho tudo que preciso. 📋<br><br>
+     Vou gerar agora o <strong>diagnóstico do caso</strong> em três cards visuais e as propostas de acordo. Um momento...`,
+    1300, 600);
+  document.getElementById('prog1').style.width='92%';
+
+  await wait(2200);
+
+  // ── TELA 2 — CARDS (Módulo 3 · Seção 5.2) ──────────────
+  setStep(5);
+  goScreen('s2');
+
+  const cards = [
+    { icon:'🏠', bg:'#e8f0f8', label:'Tipo de Problema', value:'Conflito de Vizinhança — Janela Irregular', sub:'Abertura a menos de 1m da divisa · Expõe o quintal de toda a família' },
+    { icon:'🎯', bg:'#e8f5ee', label:'Objetivo', value:'Fechamento definitivo + compensação R$ 800', sub:'Vizinho foi avisado mas se recusou a agir — contato prévio confirmado' },
+    { icon:'📷', bg:'#fff3e0', label:'Provas Disponíveis', value:'Fotos + medição da distância', sub:'Registre agora com fotos e fita métrica para fortalecer o caso' },
+  ];
+
+  const dc = document.getElementById('diag-cards');
+  for(const c of cards){
+    await wait(900);
+    const el = document.createElement('div');
+    el.className='dc';
+    el.innerHTML=`<div class="dc-hd"><div class="dc-icon" style="background:${c.bg}">${c.icon}</div><div><div class="dc-label">${c.label}</div><div class="dc-value">${c.value}</div></div></div><div class="dc-sub">${c.sub}</div>`;
+    dc.appendChild(el);
+  }
+
+  await wait(4000);
+
+  // ── TELA 3 — PROPOSTAS ──────────────────────────────────
+  setStep(6);
+  goScreen('s3');
+
+  await wait(2000);
+  const pc2 = document.getElementById('pc2');
+  const ck2 = document.getElementById('chk2');
+  pc2.classList.add('sel');
+  ck2.textContent = '✓';
+  document.querySelector('#s3 .s-sub').textContent = '✅ Proposta Intermediária selecionada — Art. 1.301 c/c Art. 1.277 CC.';
+
+  await wait(2000);
+  document.getElementById('envio-status').textContent = '📤 Enviando proposta ao demandado...';
+  pc2.classList.add('sending');
+  await wait(1500);
+  document.getElementById('envio-status').textContent = '✅ Notificação entregue a Roberto Alves Lima';
+
+  await wait(2200);
+
+  // ── TELA 4 — NOTIFICAÇÃO ────────────────────────────────
+  setStep(7);
+  document.getElementById('notif-proc').textContent = procNum;
+  document.getElementById('notif-data').textContent = fullNow();
+  goScreen('s4');
+
+  await wait(4500);
+
+  // ── TELA 4b — PORTAL DO DEMANDADO ────────────────────────
+  setStep(8);
+  goScreen('s4b');
+
+  // Remove eventual destaque do botão azul (do demandante)
+  const pbBlueDem = document.getElementById('pb-blue-dem');
+  const pbGreenDem = document.getElementById('pb-green-dem');
+  if(pbBlueDem) pbBlueDem.classList.remove('pb-active');
+  if(pbGreenDem) pbGreenDem.classList.remove('pb-active');
+
+  // Plateia vê o portal do demandado por 2s antes do clique
+  await wait(2000);
+
+  // Roberto clica em "Fui convidado para um acordo"
+  if(pbGreenDem) pbGreenDem.classList.add('pb-active');
+
+  await wait(2200);
+
+  // Limpa destaque e vai para o chat do demandado
+  if(pbGreenDem) pbGreenDem.classList.remove('pb-active');
+  await wait(400);
+
+  // ── TELA 5 — DEMANDADO (Seção 5.3) ──────────────────────
+  goScreen('s5');
+  const chat2 = document.getElementById('chat2');
+
+  await phaseTag(chat2, '— Roberto Alves Lima · Demandado —');
+
+  // Notificação amigável + Termo Visual Law (Seção 5.3 do Relatório)
+  await sysMsg(chat2,
+    `<div style="background:var(--amber-light);border:1.5px solid #fcd34d;border-radius:10px;padding:10px 12px;margin-bottom:6px;">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--amber);margin-bottom:7px;">📋 Termo de Acordo — Visual Law</div>
+      <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #fcd34d;">
+        <span style="font-size:15px;">🏠</span>
+        <div style="font-size:11px;color:#92400e;"><strong>Conflito:</strong> Janela irregular na divisa</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #fcd34d;">
+        <span style="font-size:15px;">💰</span>
+        <div style="font-size:11px;color:#92400e;"><strong>Proposta:</strong> Fechamento + R$ 800,00</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #fcd34d;">
+        <span style="font-size:15px;">📅</span>
+        <div style="font-size:11px;color:#92400e;"><strong>Prazo:</strong> 15 dias corridos</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:5px 0;">
+        <span style="font-size:15px;">⚠️</span>
+        <div style="font-size:11px;color:#92400e;"><strong>Descumprimento:</strong> Multa + execução judicial imediata</div>
+      </div>
+    </div>
+    <strong>Roberto</strong>, você recebeu uma proposta de acordo do seu vizinho pelo <strong>Sistema Alpendre</strong>. Sem tribunais, sem jargões — vamos resolver isso juntos? 🤝`,
+    1600, 600);
+
+  await usrMsg(chat2, '👀 Vi o termo. Posso fazer uma contraproposta?', '🏗️', 1100);
+
+  await sysMsg(chat2,
+    `Claro! O diálogo é sempre bem-vindo. 😊<br><br>
+     Seu vizinho Carlos propõe o <strong>fechamento definitivo da janela + R$ 800 de compensação</strong> em 15 dias.<br><br>
+     O que você teria como <strong>contraproposta</strong>?`,
+    1500, 700);
+
+  await usrMsg(chat2, '🔄 Posso instalar uma grade opaca fixa e pagar R$ 400. Não consigo os R$ 800.', '🏗️', 1100);
+
+  await sysMsg(chat2,
+    `Sua contraproposta é razoável e resolve efetivamente o problema de privacidade. O Alpendre vai encaminhar isso a Carlos Eduardo para avaliação.<br><br>
+     <strong>Contraproposta registrada:</strong> grade opaca fixa + R$ 400,00 em 10 dias.`,
+    1400, 600);
+
+  await phaseTag(chat2, '— Carlos Eduardo avalia a contraproposta —', 1200);
+
+  await wait(1500);
+  await sysMsg(chat2,
+    `✅ <strong>Carlos Eduardo aceitou sua contraproposta!</strong><br><br>
+     Ambos chegaram a um acordo. O Termo final será gerado agora com validade de <strong>título executivo extrajudicial</strong> (art. 20, §único, Lei 13.140/2015 c/c art. 784, I e II, CPC).`,
+    1300, 700);
+
+  await wait(3000);
+
+  // ── TELA 6 — INFOGRÁFICO DO ACORDO (Seção 5.4) ──────────
+  setStep(9);
+  gerarAcordo();
+  goScreen('s6');
+  document.getElementById('replay-btn').style.display='block';
+}
+
+// ══════════════════════════════════════════════════════════
+// ACORDO FINAL
+// ══════════════════════════════════════════════════════════
+function gerarAcordo(){
+  document.getElementById('s6-body').innerHTML = `
+
+    <div class="acordo-banner">
+      <span style="font-size:24px;">🤝</span>
+      <div><strong style="color:#166534;font-size:13px;">Acordo Celebrado!</strong><br><span style="font-size:11px;color:#166534;">Carlos Eduardo e Roberto chegaram a uma solução dialogada.</span></div>
+    </div>
+
+    <div class="vl-card">
+      <div class="vl-hd">
+        <div class="vl-hd-logo">⚖️ ALPENDRE</div>
+        <div class="vl-hd-title">Termo de Acordo — Visual Law</div>
+        <div class="vl-hd-num">Processo nº ${procNum} · ${todayFull()}</div>
+      </div>
+
+      <div class="vl-sec">
+        <div class="vl-sec-title">As Partes</div>
+        <div class="vl-partes">
+          <div class="vl-parte"><div class="vl-parte-role">Demandante</div><div class="vl-parte-name">Carlos Eduardo Fonseca</div><div class="vl-parte-addr">Rua das Acácias, 45</div></div>
+          <div class="vl-vs">🤝</div>
+          <div class="vl-parte"><div class="vl-parte-role">Demandado</div><div class="vl-parte-name">Roberto Alves Lima</div><div class="vl-parte-addr">Rua das Acácias, 47</div></div>
+        </div>
+      </div>
+
+      <div class="vl-sec">
+        <div class="vl-sec-title">Objeto</div>
+        <div class="vl-objeto"><p>Janela construída na prop. nº 47, voltada ao quintal do nº 45, em desconformidade com o Art. 1.301 do CC (recuo mínimo de 1,5m).</p><span class="legal-tag">⚖️ Art. 1.301 c/c Art. 1.277 do CC</span></div>
+      </div>
+
+      <div class="vl-sec">
+        <div class="vl-sec-title">Termos Acordados</div>
+        <div class="vl-infog">
+          <div class="vl-item vi-action">
+            <div class="vl-item-icon">🪟</div>
+            <div><div class="vl-item-lbl">Contraproposta Aceita</div><div class="vl-item-val">Instalação de grade opaca fixa na janela</div></div>
+          </div>
+          <div class="vl-item vi-money">
+            <div class="vl-item-icon">💰</div>
+            <div><div class="vl-item-lbl">Compensação</div><div class="vl-item-val">R$ 400,00 pelos transtornos</div></div>
+          </div>
+          <div class="vl-item vi-date">
+            <div class="vl-item-icon">📅</div>
+            <div><div class="vl-item-lbl">Prazo</div><div class="vl-item-val">10 dias corridos a partir de ${todayFull()}</div></div>
+          </div>
+          <div class="vl-item vi-warn">
+            <div class="vl-item-icon">⚠️</div>
+            <div><div class="vl-item-lbl">Se não cumprir</div><div class="vl-item-val">Multa 10% + juros 1% a.m. + execução judicial imediata</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="vl-sec">
+        <div class="vl-sec-title">Integridade — Blockchain</div>
+        <div class="bc-box">
+          <div class="bc-lbl">Hash SHA-256</div>
+          <div class="bc-hash">${hashVal}</div>
+          <div class="bc-status"><span class="bc-dot"></span> Registrado · Imutável · Verificável offline</div>
+        </div>
+      </div>
+
+      <div class="vl-sec">
+        <div class="vl-sec-title">Assinaturas — Lei 14.063/2020</div>
+        <div class="vl-sigs">
+          <div class="vl-sig"><div class="vl-sig-ico">✅</div><div class="vl-sig-name">Carlos E. Fonseca</div><div class="vl-sig-role">Demandante</div></div>
+          <div class="vl-sig"><div class="vl-sig-ico">✅</div><div class="vl-sig-name">Roberto A. Lima</div><div class="vl-sig-role">Demandado</div></div>
+          <div class="vl-sig"><div class="vl-sig-ico">🌿</div><div class="vl-sig-name">Alpendre</div><div class="vl-sig-role">Mediador Digital</div></div>
+        </div>
+      </div>
+
+      <div class="vl-legal-foot">
+        Título executivo extrajudicial — art. 20, §único, Lei 13.140/2015 c/c art. 784, I e II, CPC/2015. Fluxo digital em conformidade com o art. 319 do CPC e com a Lei 13.655/2018 (LINDB). Visual Law — Res. CNJ 347/2020. Assinatura eletrônica — Lei 14.063/2020. Governança de IA — Res. CNJ 395/2021 e 615/2025. Dados protegidos pela LGPD.
+      </div>
+    </div>
+
+    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:12px;text-align:center;">
+      <div style="font-size:11px;color:#166534;font-weight:700;">⏱️ Duração total da sessão: ~9 minutos</div>
+      <div style="font-size:10px;color:#166534;margin-top:3px;">Acordo extrajudicial — sem custas processuais</div>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════════════════════
+// ZOOM DINÂMICO — preenche a tela para apresentação
+// ══════════════════════════════════════════════════════════
+function adjustPhoneSize(){
+  const panelW = 250;
+  const availH = window.innerHeight;
+  const availW = window.innerWidth - panelW - 20;
+  const zoomH = availH / 760;
+  const zoomW = availW / 360;
+  const zoom = Math.min(zoomH, zoomW);
+  document.documentElement.style.setProperty('--phone-zoom', Math.max(0.6, zoom));
+}
+window.addEventListener('resize', adjustPhoneSize);
+adjustPhoneSize();
+
+// Iniciar simulação automaticamente
+function iniciarSim(){
+  const btn = document.getElementById('start-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Simulando...';
+  btn.style.background = '#374151';
+  btn.style.cursor = 'default';
+  run();
+}
+
+window.addEventListener('load', () => { adjustPhoneSize(); goScreen('s0'); setStep(0); });
+</script>
+</body>
+</html>
