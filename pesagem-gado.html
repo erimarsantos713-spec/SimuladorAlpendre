@@ -6,16 +6,16 @@
 <title>PesoVivo — Estimativa de Peso Animal</title>
 <style>
 :root {
-  --primary: #1b5e20;
-  --primary-light: #4caf50;
-  --primary-dark: #0d3b13;
-  --accent: #ff8f00;
-  --accent-light: #ffc046;
-  --bg: #f5f5f0;
+  --primary: #1b4332;
+  --primary-light: #2d6a4f;
+  --primary-dark: #0f2b1e;
+  --accent: #c9a84c;
+  --accent-light: #dcc06e;
+  --bg: #f7f5f0;
   --card: #ffffff;
-  --text: #212121;
-  --muted: #757575;
-  --border: #e0e0e0;
+  --text: #1a1a1a;
+  --muted: #6b6b6b;
+  --border: #ddd8cf;
   --danger: #c62828;
   --info: #0277bd;
   --shadow: 0 2px 8px rgba(0,0,0,.12);
@@ -79,7 +79,7 @@ body {
 .btn-primary:hover { background: var(--primary-dark); }
 .btn-primary:disabled { background: #a5d6a7; cursor: not-allowed; }
 .btn-accent { background: var(--accent); color: white; }
-.btn-accent:hover { background: #e65100; }
+.btn-accent:hover { background: #a8893e; }
 .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
 .btn-outline:hover { background: rgba(27,94,32,.06); }
 .btn-sm { padding: 8px 14px; font-size: 12px; width: auto; }
@@ -183,7 +183,7 @@ body {
   font-size: 13px; font-weight: 600;
 }
 .category-item:hover { border-color: var(--primary-light); }
-.category-item.selected { border-color: var(--primary); background: rgba(27,94,32,.06); }
+.category-item.selected { border-color: var(--primary); background: rgba(27,67,50,.06); }
 .category-item .icon { font-size: 28px; display: block; margin-bottom: 4px; }
 .canvas-toolbar {
   display: flex; gap: 6px; padding: 8px; background: var(--card); border-radius: 8px;
@@ -193,7 +193,7 @@ body {
   padding: 6px 12px; border-radius: 6px; border: 1.5px solid var(--border); background: white;
   font-size: 11px; font-weight: 600; cursor: pointer; color: var(--muted); transition: all .15s;
 }
-.tool-btn.active { border-color: var(--primary); color: var(--primary); background: rgba(27,94,32,.06); }
+.tool-btn.active { border-color: var(--primary); color: var(--primary); background: rgba(27,67,50,.06); }
 .tool-btn:hover { border-color: var(--primary-light); }
 </style>
 </head>
@@ -439,10 +439,10 @@ body {
       <p><strong>PT</strong> = circunferência do tórax atrás da paleta. <strong>CC</strong> = ombro ao ísquio.</p>
       <p style="margin-top:6px;"><strong>No modo foto:</strong> altura visível × <strong>2,65</strong> (fator elíptico) = PT estimado.</p>
       <div style="margin-top:8px;">
-        <span class="race-badge" style="background:#4caf50">Nelore ×0.97</span>
-        <span class="race-badge" style="background:#2196f3">Angus ×1.03</span>
-        <span class="race-badge" style="background:#ff9800">Brahman ×0.98</span>
-        <span class="race-badge" style="background:#f44336">Hereford ×1.04</span>
+        <span class="race-badge" style="background:#1b4332">Nelore ×0.97</span>
+        <span class="race-badge" style="background:#2d6a4f">Angus ×1.03</span>
+        <span class="race-badge" style="background:#c9a84c;color:#1a1a1a">Brahman ×0.98</span>
+        <span class="race-badge" style="background:#8b7535;color:white">Hereford ×1.04</span>
       </div>
     </div>
   </div>
