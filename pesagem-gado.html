@@ -555,7 +555,89 @@ body {
 <!-- Screen: Nova Medição -->
 <div class="screen active" id="screen-medir">
 
-  <!-- Step 1: Foto -->
+  <!-- Modo de medição -->
+  <div class="card" id="card-modo">
+    <h3>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      Escolha o Modo
+    </h3>
+    <div class="category-grid">
+      <div class="category-item selected" id="modo-foto" onclick="setModo('foto')">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <strong>Por Foto</strong>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Marque medidas na imagem</div>
+      </div>
+      <div class="category-item" id="modo-manual" onclick="setModo('manual')">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 20h4L19.5 8.5a2.12 2.12 0 00-3-3L5 17v3z"/><path d="M15 6l3 3"/></svg>
+        <strong>Manual</strong>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Digite PT e CC com fita métrica</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODO MANUAL -->
+  <div class="card" id="card-manual" style="display:none">
+    <h3>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M4 20h4L19.5 8.5a2.12 2.12 0 00-3-3L5 17v3z"/></svg>
+      Medidas com Fita Métrica
+    </h3>
+
+    <div class="info-box">
+      Use uma fita métrica para medir diretamente no animal. Este é o método mais preciso.
+    </div>
+
+    <div class="form-group">
+      <label>Perímetro Torácico — PT (cm)</label>
+      <input type="number" id="manualPT" placeholder="Ex: 180 (circunferência atrás da paleta)" min="50" max="350" oninput="checkManualCalc()">
+      <small style="color:var(--muted);font-size:11px;">Passe a fita ao redor do tórax, logo atrás das patas dianteiras</small>
+    </div>
+
+    <div class="form-group">
+      <label>Comprimento Corporal — CC (cm)</label>
+      <input type="number" id="manualCC" placeholder="Ex: 140 (ombro ao ísquio)" min="30" max="300" oninput="checkManualCalc()">
+      <small style="color:var(--muted);font-size:11px;">Da ponta do ombro à ponta do ísquio (traseira)</small>
+    </div>
+
+    <div class="form-group">
+      <label>Raça</label>
+      <select id="manualRaca">
+        <option value="nelore">Nelore</option>
+        <option value="angus">Angus</option>
+        <option value="brahman">Brahman</option>
+        <option value="girolando">Girolando</option>
+        <option value="hereford">Hereford</option>
+        <option value="tabapua">Tabapuã</option>
+        <option value="guzerá">Guzerá</option>
+        <option value="sindi">Sindi</option>
+        <option value="mestico">Mestiço / SRD</option>
+        <option value="outro">Outro</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Sexo / Categoria</label>
+      <select id="manualSexo">
+        <option value="vaca">Vaca</option>
+        <option value="touro">Touro</option>
+        <option value="novilha">Novilha</option>
+        <option value="novilho">Novilho</option>
+        <option value="bezerro">Bezerro(a)</option>
+        <option value="boi">Boi (castrado)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Identificação (opcional)</label>
+      <input type="text" id="manualAnimalId" placeholder="Ex: Brinco 042, Estrela, Lote 3...">
+    </div>
+
+    <button class="btn btn-accent" id="btnCalcManual" onclick="calcularPesoManual()" disabled>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      Calcular Peso Estimado
+    </button>
+  </div>
+
+  <!-- MODO FOTO: Step 1 -->
   <div class="card" id="card-foto">
     <h3>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
@@ -583,7 +665,7 @@ body {
     </div>
   </div>
 
-  <!-- Step 2: Referência e Medições -->
+  <!-- MODO FOTO: Step 2 -->
   <div class="card" id="card-medidas" style="display:none">
     <h3>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M2 12h4M18 12h4M12 2v4M12 18v4"/><circle cx="12" cy="12" r="3"/></svg>
@@ -618,8 +700,8 @@ body {
       <div class="step-item" id="step-torax">
         <div class="step-num pending" id="stepnum-torax">2</div>
         <div class="step-text">
-          <strong>Perímetro torácico (estimado)</strong>
-          <small>Marque a altura do tórax logo atrás da paleta</small>
+          <strong>Altura do tórax</strong>
+          <small>Marque o topo do dorso e a base do peito, atrás da paleta</small>
         </div>
         <div class="step-value" id="stepval-torax">—</div>
       </div>
@@ -639,7 +721,7 @@ body {
     </div>
 
     <div class="form-group">
-      <label>Categoria do animal</label>
+      <label>Raça</label>
       <select id="animalCategory">
         <option value="nelore">Nelore</option>
         <option value="angus">Angus</option>
@@ -743,7 +825,7 @@ body {
       Como Funciona
     </h3>
     <p style="font-size:13px;line-height:1.7;color:var(--muted);">
-      O <strong>PesoVivo</strong> estima o peso de bovinos usando a <strong>fórmula de Schaeffer</strong> e variações, amplamente utilizadas na zootecnia. A partir de duas medidas corporais extraídas da foto, o app calcula o peso com precisão de ±8-15%.
+      O <strong>PesoVivo</strong> estima o peso de bovinos usando a <strong>fórmula de Schaeffer</strong> e variações, amplamente utilizadas na zootecnia. Você pode medir com <strong>fita métrica</strong> (mais preciso) ou <strong>pela foto</strong> marcando pontos na imagem. Precisão de ±8-15%.
     </p>
   </div>
 
@@ -770,7 +852,7 @@ body {
   <div class="card">
     <h3>📐 Fórmulas Utilizadas</h3>
     <div style="font-size:12px;line-height:1.8;color:var(--muted);">
-      <p><strong>Schaeffer (padrão):</strong></p>
+      <p><strong>Schaeffer (taurinos):</strong></p>
       <p style="background:var(--bg);padding:8px;border-radius:6px;font-family:monospace;margin:4px 0 12px;">
         Peso = PT² × CC ÷ 10.840
       </p>
@@ -779,6 +861,7 @@ body {
         Peso = PT² × CC ÷ 10.600
       </p>
       <p>Onde PT = perímetro torácico em cm e CC = comprimento corporal em cm.</p>
+      <p style="margin-top:8px;"><strong>No modo foto:</strong> a altura visível do tórax é multiplicada por <strong>2,65</strong> (fator elíptico bovino) para estimar o perímetro, já que o corte transversal do tórax bovino é elíptico, não circular.</p>
     </div>
   </div>
 
@@ -847,6 +930,7 @@ body {
 
 <script>
 const state = {
+  modo: 'foto',
   photo: null,
   photoDataUrl: null,
   imgWidth: 0,
@@ -901,6 +985,31 @@ function showScreen(name) {
   document.getElementById('screen-' + name).classList.add('active');
   document.getElementById('tab-' + name).classList.add('active');
   if (name === 'historico') renderHistory();
+}
+
+function setModo(modo) {
+  state.modo = modo;
+  document.getElementById('modo-foto').classList.toggle('selected', modo === 'foto');
+  document.getElementById('modo-manual').classList.toggle('selected', modo === 'manual');
+  document.getElementById('card-foto').style.display = modo === 'foto' ? 'block' : 'none';
+  document.getElementById('card-manual').style.display = modo === 'manual' ? 'block' : 'none';
+  document.getElementById('card-medidas').style.display = 'none';
+  document.getElementById('resultArea').style.display = 'none';
+}
+
+function checkManualCalc() {
+  const pt = parseFloat(document.getElementById('manualPT').value);
+  const cc = parseFloat(document.getElementById('manualCC').value);
+  document.getElementById('btnCalcManual').disabled = !(pt > 0 && cc > 0);
+}
+
+function calcularPesoManual() {
+  const pt = parseFloat(document.getElementById('manualPT').value);
+  const cc = parseFloat(document.getElementById('manualCC').value);
+  const raca = document.getElementById('manualRaca').value;
+  const sexo = document.getElementById('manualSexo').value;
+  const id = document.getElementById('manualAnimalId').value;
+  calcularPesoComum(pt, cc, raca, sexo, id, 'manual', 0);
 }
 
 function showToast(msg) {
@@ -1165,15 +1274,25 @@ function calcularPeso() {
   state.scale = refSize / state.pixelDistances.ref;
 
   const alturaTorax = state.pixelDistances.torax * state.scale;
-  const perimetroTorax = alturaTorax * Math.PI;
+  const perimetroTorax = alturaTorax * 2.65;
   const compCorpo = state.pixelDistances.corpo * state.scale;
-
-  state.realDistances.torax = perimetroTorax;
-  state.realDistances.corpo = compCorpo;
 
   const raca = document.getElementById('animalCategory').value;
   const sexo = document.getElementById('animalSex').value;
   const id = document.getElementById('animalId').value;
+  calcularPesoComum(perimetroTorax, compCorpo, raca, sexo, id, 'foto', alturaTorax);
+}
+
+function calcularPesoComum(perimetroTorax, compCorpo, raca, sexo, id, modo, alturaTorax) {
+  const racaNames = {
+    nelore: 'Nelore', angus: 'Angus', brahman: 'Brahman',
+    girolando: 'Girolando', hereford: 'Hereford', tabapua: 'Tabapuã',
+    'guzerá': 'Guzerá', sindi: 'Sindi', mestico: 'Mestiço/SRD', outro: 'Outro'
+  };
+  const sexoNames = {
+    vaca: 'Vaca', touro: 'Touro', novilha: 'Novilha',
+    novilho: 'Novilho', bezerro: 'Bezerro(a)', boi: 'Boi (castrado)'
+  };
 
   const isZebu = ['nelore', 'brahman', 'tabapua', 'guzerá', 'sindi'].includes(raca);
   const divisor = isZebu ? 10600 : 10840;
@@ -1188,6 +1307,19 @@ function calcularPeso() {
   const pesoMax = Math.round(peso * 1.12);
   peso = Math.round(peso);
 
+  // Sanity check
+  let aviso = '';
+  if (sexo === 'bezerro' && peso > 300) {
+    aviso = 'Peso alto para bezerro. Verifique as medidas.';
+  } else if (sexo !== 'bezerro' && peso < 100) {
+    aviso = 'Peso muito baixo para bovino adulto. Verifique as medidas e a referência de escala.';
+  } else if (peso > 1200) {
+    aviso = 'Peso acima de 1.200 kg. Verifique as medidas.';
+  }
+  if (perimetroTorax < 80 && sexo !== 'bezerro') {
+    aviso = 'Perímetro torácico muito baixo (' + perimetroTorax.toFixed(0) + ' cm). Verifique a marcação e o tamanho da referência.';
+  }
+
   document.getElementById('resultWeight').textContent = peso;
   document.getElementById('resultRange').textContent = 'Faixa provável: ' + pesoMin + ' – ' + pesoMax + ' kg';
   document.getElementById('resTorax').textContent = perimetroTorax.toFixed(0) + ' cm';
@@ -1196,26 +1328,27 @@ function calcularPeso() {
     'Fórmula: PT² × CC ÷ ' + divisor.toLocaleString('pt-BR') +
     ' × ' + fatorRaca.toFixed(2) + ' (raça) × ' + fatorSexo.toFixed(2) + ' (sexo)';
 
-  const racaNames = {
-    nelore: 'Nelore', angus: 'Angus', brahman: 'Brahman',
-    girolando: 'Girolando', hereford: 'Hereford', tabapua: 'Tabapuã',
-    'guzerá': 'Guzerá', sindi: 'Sindi', mestico: 'Mestiço/SRD', outro: 'Outro'
-  };
-  const sexoNames = {
-    vaca: 'Vaca', touro: 'Touro', novilha: 'Novilha',
-    novilho: 'Novilho', bezerro: 'Bezerro(a)', boi: 'Boi (castrado)'
-  };
-
-  document.getElementById('resultDetails').innerHTML =
+  let detailsHtml =
+    '<strong>Modo:</strong> ' + (modo === 'manual' ? 'Fita métrica (medida direta)' : 'Estimativa por foto') + '<br>' +
     '<strong>Raça:</strong> ' + (racaNames[raca] || raca) + '<br>' +
     '<strong>Categoria:</strong> ' + (sexoNames[sexo] || sexo) + '<br>' +
-    (id ? '<strong>Identificação:</strong> ' + escapeHtml(id) + '<br>' : '') +
-    '<strong>Altura tórax (foto):</strong> ' + alturaTorax.toFixed(1) + ' cm<br>' +
-    '<strong>Perím. torácico (estimado):</strong> ' + perimetroTorax.toFixed(1) + ' cm<br>' +
+    (id ? '<strong>Identificação:</strong> ' + escapeHtml(id) + '<br>' : '');
+  if (modo === 'foto' && alturaTorax > 0) {
+    detailsHtml += '<strong>Altura tórax (foto):</strong> ' + alturaTorax.toFixed(1) + ' cm<br>';
+    detailsHtml += '<strong>Fator conversão:</strong> altura × 2.65 = PT estimado<br>';
+    detailsHtml += '<strong>Escala:</strong> ' + state.scale.toFixed(4) + ' cm/px<br>';
+  }
+  detailsHtml +=
+    '<strong>Perím. torácico:</strong> ' + perimetroTorax.toFixed(1) + ' cm<br>' +
     '<strong>Comprimento corporal:</strong> ' + compCorpo.toFixed(1) + ' cm<br>' +
-    '<strong>Escala:</strong> ' + state.scale.toFixed(4) + ' cm/px<br>' +
     '<strong>Fórmula:</strong> ' + (isZebu ? 'Quetelet (zebuínos)' : 'Schaeffer (taurinos)') + '<br>' +
     '<strong>Data:</strong> ' + new Date().toLocaleString('pt-BR');
+
+  if (aviso) {
+    detailsHtml += '<br><div class="warning-box" style="margin-top:8px;"><strong>Atenção:</strong> ' + aviso + '</div>';
+  }
+
+  document.getElementById('resultDetails').innerHTML = detailsHtml;
 
   document.getElementById('resultArea').style.display = 'block';
   document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
@@ -1231,8 +1364,9 @@ function calcularPeso() {
     raca: racaNames[raca] || raca,
     sexo: sexoNames[sexo] || sexo,
     animalId: id,
-    thumb: createThumbnail(),
-    formula: isZebu ? 'Quetelet' : 'Schaeffer'
+    thumb: modo === 'foto' ? createThumbnail() : '',
+    formula: isZebu ? 'Quetelet' : 'Schaeffer',
+    modo: modo
   };
   state.history.unshift(record);
   if (state.history.length > 50) state.history.pop();
