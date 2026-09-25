@@ -647,17 +647,26 @@ body {
       Tire uma foto lateral do animal, com o corpo inteiro visível. Inclua um objeto de referência de tamanho conhecido (bastão, régua, etc.)
     </p>
 
-    <div class="photo-area" id="photoArea" onclick="document.getElementById('photoInput').click()">
+    <div class="photo-area" id="photoArea">
       <div class="photo-placeholder" id="photoPlaceholder">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
           <circle cx="12" cy="13" r="4"/>
         </svg>
-        <p>Toque para tirar ou selecionar foto</p>
+        <p>Escolha uma opção abaixo</p>
         <small>Vista lateral completa do animal</small>
+        <div class="btn-row" style="margin-top:12px;">
+          <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();document.getElementById('photoCam').click()">
+            📷 Câmera
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();document.getElementById('photoGal').click()">
+            🖼 Galeria
+          </button>
+        </div>
       </div>
     </div>
-    <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="loadPhoto(this)">
+    <input type="file" id="photoCam" accept="image/*" capture="environment" style="display:none" onchange="loadPhoto(this)">
+    <input type="file" id="photoGal" accept="image/*" style="display:none" onchange="loadPhoto(this)">
 
     <div class="btn-row" id="photoBtns" style="display:none">
       <button class="btn btn-outline btn-sm" onclick="resetPhoto()">Trocar Foto</button>
@@ -1048,17 +1057,26 @@ function resetPhoto() {
   state.photoDataUrl = null;
   const area = document.getElementById('photoArea');
   area.classList.remove('has-image');
-  area.onclick = () => document.getElementById('photoInput').click();
+  area.onclick = null;
   area.innerHTML = `<div class="photo-placeholder" id="photoPlaceholder">
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
       <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
       <circle cx="12" cy="13" r="4"/>
     </svg>
-    <p>Toque para tirar ou selecionar foto</p>
+    <p>Escolha uma opção abaixo</p>
     <small>Vista lateral completa do animal</small>
+    <div class="btn-row" style="margin-top:12px;">
+      <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();document.getElementById('photoCam').click()">
+        📷 Câmera
+      </button>
+      <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();document.getElementById('photoGal').click()">
+        🖼 Galeria
+      </button>
+    </div>
   </div>`;
   document.getElementById('photoBtns').style.display = 'none';
-  document.getElementById('photoInput').value = '';
+  document.getElementById('photoCam').value = '';
+  document.getElementById('photoGal').value = '';
 }
 
 function goToStep2() {
