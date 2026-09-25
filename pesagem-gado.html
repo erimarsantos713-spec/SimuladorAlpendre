@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>PesoVivo — Estimativa de Peso por Foto</title>
+<title>PesoVivo — Estimativa de Peso Animal</title>
 <style>
 :root {
   --primary: #1b5e20;
@@ -21,212 +21,89 @@
   --shadow: 0 2px 8px rgba(0,0,0,.12);
   --radius: 12px;
 }
-
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
 body {
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.5;
-  overflow-x: hidden;
+  background: var(--bg); color: var(--text); line-height: 1.5; overflow-x: hidden;
 }
-
-/* Header */
 .header {
   background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-  color: white;
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: 0 2px 12px rgba(0,0,0,.2);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  color: white; padding: 16px 20px; display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.2); position: sticky; top: 0; z-index: 100;
 }
 .header svg { flex-shrink: 0; }
 .header h1 { font-size: 20px; font-weight: 700; }
 .header small { font-size: 11px; opacity: .8; display: block; margin-top: 2px; }
-
-/* Tabs */
 .tabs {
-  display: flex;
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 60px;
-  z-index: 99;
+  display: flex; background: var(--card); border-bottom: 1px solid var(--border);
+  position: sticky; top: 60px; z-index: 99;
 }
 .tab {
-  flex: 1;
-  padding: 12px 8px;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--muted);
-  border: none;
-  background: none;
-  cursor: pointer;
-  border-bottom: 3px solid transparent;
-  transition: all .2s;
+  flex: 1; padding: 12px 8px; text-align: center; font-size: 13px; font-weight: 600;
+  color: var(--muted); border: none; background: none; cursor: pointer;
+  border-bottom: 3px solid transparent; transition: all .2s;
 }
-.tab.active {
-  color: var(--primary);
-  border-bottom-color: var(--primary);
-}
+.tab.active { color: var(--primary); border-bottom-color: var(--primary); }
 .tab svg { display: block; margin: 0 auto 4px; }
-
-/* Screens */
 .screen { display: none; padding: 16px; padding-bottom: 80px; }
 .screen.active { display: block; }
-
-/* Cards */
 .card {
-  background: var(--card);
-  border-radius: var(--radius);
-  padding: 16px;
-  margin-bottom: 12px;
-  box-shadow: var(--shadow);
+  background: var(--card); border-radius: var(--radius); padding: 16px;
+  margin-bottom: 12px; box-shadow: var(--shadow);
 }
 .card h3 {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--primary);
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
 }
-
-/* Photo area */
 .photo-area {
-  position: relative;
-  background: #e8e8e0;
-  border-radius: var(--radius);
-  min-height: 250px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  cursor: pointer;
-  border: 2px dashed var(--border);
-  transition: border-color .2s;
+  position: relative; background: #e8e8e0; border-radius: var(--radius); min-height: 220px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  overflow: hidden; border: 2px dashed var(--border); transition: border-color .2s;
 }
-.photo-area.has-image { border-style: solid; border-color: var(--primary-light); cursor: default; }
-.photo-area img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
-}
-.photo-placeholder {
-  text-align: center;
-  padding: 20px;
-  color: var(--muted);
-}
+.photo-area.has-image { border-style: solid; border-color: var(--primary-light); }
+.photo-area img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.photo-placeholder { text-align: center; padding: 20px; color: var(--muted); }
 .photo-placeholder svg { margin-bottom: 12px; opacity: .5; }
 .photo-placeholder p { font-size: 14px; }
 .photo-placeholder small { font-size: 11px; display: block; margin-top: 4px; }
-
-/* Canvas overlay */
-.canvas-container {
-  position: relative;
-  width: 100%;
-  display: none;
-}
-.canvas-container img {
-  width: 100%;
-  display: block;
-  border-radius: var(--radius);
-}
-.canvas-container canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  cursor: crosshair;
-}
-
-/* Buttons */
+.canvas-container { position: relative; width: 100%; display: none; }
+.canvas-container img { width: 100%; display: block; border-radius: var(--radius); }
+.canvas-container canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: crosshair; }
 .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  transition: all .2s;
-  width: 100%;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 600;
+  border: none; cursor: pointer; transition: all .2s; width: 100%;
 }
 .btn-primary { background: var(--primary); color: white; }
 .btn-primary:hover { background: var(--primary-dark); }
 .btn-primary:disabled { background: #a5d6a7; cursor: not-allowed; }
 .btn-accent { background: var(--accent); color: white; }
 .btn-accent:hover { background: #e65100; }
-.btn-outline {
-  background: transparent;
-  color: var(--primary);
-  border: 2px solid var(--primary);
-}
+.btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
 .btn-outline:hover { background: rgba(27,94,32,.06); }
-.btn-danger { background: var(--danger); color: white; }
 .btn-sm { padding: 8px 14px; font-size: 12px; width: auto; }
 .btn-row { display: flex; gap: 8px; margin-top: 12px; }
 .btn-row .btn { flex: 1; }
-
-/* Form elements */
 .form-group { margin-bottom: 12px; }
 .form-group label {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--muted);
-  margin-bottom: 4px;
-  text-transform: uppercase;
-  letter-spacing: .5px;
+  display: block; font-size: 12px; font-weight: 600; color: var(--muted);
+  margin-bottom: 4px; text-transform: uppercase; letter-spacing: .5px;
 }
 .form-group input, .form-group select {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  font-size: 14px;
-  background: var(--bg);
-  color: var(--text);
-  transition: border-color .2s;
+  width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px;
+  font-size: 14px; background: var(--bg); color: var(--text); transition: border-color .2s;
 }
-.form-group input:focus, .form-group select:focus {
-  outline: none;
-  border-color: var(--primary-light);
-}
-
-/* Measurement steps */
+.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary-light); }
 .steps { counter-reset: step; }
 .step-item {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  padding: 10px 0;
+  display: flex; gap: 12px; align-items: flex-start; padding: 10px 0;
   border-bottom: 1px solid var(--border);
 }
 .step-item:last-child { border-bottom: none; }
 .step-num {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 700;
-  flex-shrink: 0;
+  width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0;
 }
 .step-num.pending { background: #e0e0e0; color: var(--muted); }
 .step-num.active { background: var(--accent); color: white; }
@@ -235,293 +112,93 @@ body {
 .step-text strong { display: block; font-size: 13px; }
 .step-text small { color: var(--muted); font-size: 11px; }
 .step-value { font-size: 13px; font-weight: 700; color: var(--primary); }
-
-/* Point markers on image */
-.point-marker {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  border: 2px solid white;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-  box-shadow: 0 1px 4px rgba(0,0,0,.4);
-  pointer-events: none;
-}
-.point-label {
-  position: absolute;
-  transform: translate(-50%, -130%);
-  background: rgba(0,0,0,.75);
-  color: white;
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  white-space: nowrap;
-  z-index: 10;
-  pointer-events: none;
-}
-.line-measurement {
-  position: absolute;
-  z-index: 5;
-  pointer-events: none;
-}
-
-/* Result display */
 .result-box {
   background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-  color: white;
-  border-radius: var(--radius);
-  padding: 24px;
-  text-align: center;
-  margin: 16px 0;
+  color: white; border-radius: var(--radius); padding: 24px; text-align: center; margin: 16px 0;
 }
-.result-weight {
-  font-size: 48px;
-  font-weight: 800;
-  line-height: 1;
-}
+.result-weight { font-size: 48px; font-weight: 800; line-height: 1; }
 .result-unit { font-size: 18px; font-weight: 400; opacity: .8; }
-.result-range {
-  font-size: 14px;
-  opacity: .8;
-  margin-top: 8px;
-}
+.result-range { font-size: 14px; opacity: .8; margin-top: 8px; }
 .result-formula {
-  font-size: 11px;
-  opacity: .6;
-  margin-top: 12px;
-  padding-top: 12px;
+  font-size: 11px; opacity: .6; margin-top: 12px; padding-top: 12px;
   border-top: 1px solid rgba(255,255,255,.2);
 }
-.result-details {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 12px;
-}
-.result-detail {
-  background: rgba(255,255,255,.1);
-  border-radius: 8px;
-  padding: 10px;
-  text-align: center;
-}
+.result-details { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.result-detail { background: rgba(255,255,255,.1); border-radius: 8px; padding: 10px; text-align: center; }
 .result-detail .val { font-size: 20px; font-weight: 700; }
 .result-detail .lbl { font-size: 11px; opacity: .7; }
-
-/* History list */
 .history-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-  transition: background .15s;
+  display: flex; align-items: center; gap: 12px; padding: 12px;
+  border-bottom: 1px solid var(--border); cursor: pointer; transition: background .15s;
 }
 .history-item:hover { background: var(--bg); }
 .history-item:last-child { border-bottom: none; }
 .history-thumb {
-  width: 56px;
-  height: 56px;
-  border-radius: 8px;
-  object-fit: cover;
-  flex-shrink: 0;
-  background: #e0e0e0;
+  width: 56px; height: 56px; border-radius: 8px; object-fit: cover;
+  flex-shrink: 0; background: #e0e0e0;
 }
 .history-info { flex: 1; min-width: 0; }
 .history-info strong { display: block; font-size: 14px; }
 .history-info small { color: var(--muted); font-size: 12px; }
-.history-weight {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--primary);
-  white-space: nowrap;
-}
-.history-empty {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--muted);
-}
+.history-weight { font-size: 18px; font-weight: 700; color: var(--primary); white-space: nowrap; }
+.history-empty { text-align: center; padding: 40px 20px; color: var(--muted); }
 .history-empty svg { margin-bottom: 12px; opacity: .4; }
-
-/* Info boxes */
 .info-box {
-  background: #e3f2fd;
-  border-left: 4px solid var(--info);
-  border-radius: 0 8px 8px 0;
-  padding: 12px;
-  margin: 12px 0;
-  font-size: 12px;
-  color: #01579b;
-  line-height: 1.6;
+  background: #e3f2fd; border-left: 4px solid var(--info); border-radius: 0 8px 8px 0;
+  padding: 12px; margin: 12px 0; font-size: 12px; color: #01579b; line-height: 1.6;
 }
 .warning-box {
-  background: #fff3e0;
-  border-left: 4px solid var(--accent);
-  border-radius: 0 8px 8px 0;
-  padding: 12px;
-  margin: 12px 0;
-  font-size: 12px;
-  color: #e65100;
-  line-height: 1.6;
+  background: #fff3e0; border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0;
+  padding: 12px; margin: 12px 0; font-size: 12px; color: #e65100; line-height: 1.6;
 }
-
-/* Guide illustrations */
-.guide-img {
-  width: 100%;
-  border-radius: 8px;
-  margin: 8px 0;
-}
-.guide-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin: 8px 0;
-}
-.guide-step {
-  background: var(--bg);
-  border-radius: 8px;
-  padding: 12px;
-  text-align: center;
-  font-size: 12px;
-}
+.guide-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+.guide-step { background: var(--bg); border-radius: 8px; padding: 12px; text-align: center; font-size: 12px; }
 .guide-step strong { display: block; color: var(--primary); margin-bottom: 4px; }
-
-/* Race badge */
 .race-badge {
-  display: inline-block;
-  background: var(--primary-light);
-  color: white;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 600;
+  display: inline-block; background: var(--primary-light); color: white;
+  padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; margin: 2px;
 }
-
-/* Instruction overlay */
 .instruction-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,.7);
-  z-index: 200;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.7);
+  z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px;
 }
 .instruction-overlay.active { display: flex; }
 .instruction-card {
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
-  max-width: 340px;
-  width: 100%;
-  text-align: center;
+  background: white; border-radius: 16px; padding: 24px; max-width: 340px; width: 100%; text-align: center;
 }
 .instruction-card h3 { justify-content: center; font-size: 16px; margin-bottom: 12px; }
 .instruction-card p { font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.6; }
-
-/* Responsive */
-@media (min-width: 600px) {
-  .screen { max-width: 500px; margin: 0 auto; }
-}
-
-/* Animations */
-@keyframes pulse {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); }
-  50% { transform: translate(-50%, -50%) scale(1.3); }
-}
-.point-marker.pulsing { animation: pulse .8s ease-in-out infinite; }
-
-/* Toast */
+@media (min-width: 600px) { .screen { max-width: 500px; margin: 0 auto; } }
 .toast {
-  position: fixed;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background: #333;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 13px;
-  z-index: 300;
-  transition: transform .3s ease;
-  white-space: nowrap;
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(100px);
+  background: #333; color: white; padding: 12px 24px; border-radius: 8px; font-size: 13px;
+  z-index: 300; transition: transform .3s ease; white-space: nowrap;
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
-
-/* Category selector */
-.category-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin: 12px 0;
-}
+.category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+.category-grid.tri { grid-template-columns: 1fr 1fr 1fr; }
 .category-item {
-  background: var(--bg);
-  border: 2px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px 10px;
-  text-align: center;
-  cursor: pointer;
-  transition: all .2s;
-  font-size: 13px;
-  font-weight: 600;
+  background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius);
+  padding: 14px 10px; text-align: center; cursor: pointer; transition: all .2s;
+  font-size: 13px; font-weight: 600;
 }
 .category-item:hover { border-color: var(--primary-light); }
 .category-item.selected { border-color: var(--primary); background: rgba(27,94,32,.06); }
-.category-item svg { display: block; margin: 0 auto 6px; }
-
-/* Toolbar for canvas */
+.category-item .icon { font-size: 28px; display: block; margin-bottom: 4px; }
 .canvas-toolbar {
-  display: flex;
-  gap: 6px;
-  padding: 8px;
-  background: var(--card);
-  border-radius: 8px;
-  margin-top: 8px;
-  justify-content: center;
+  display: flex; gap: 6px; padding: 8px; background: var(--card); border-radius: 8px;
+  margin-top: 8px; justify-content: center; flex-wrap: wrap;
 }
 .tool-btn {
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: 1.5px solid var(--border);
-  background: white;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  color: var(--muted);
-  transition: all .15s;
+  padding: 6px 12px; border-radius: 6px; border: 1.5px solid var(--border); background: white;
+  font-size: 11px; font-weight: 600; cursor: pointer; color: var(--muted); transition: all .15s;
 }
 .tool-btn.active { border-color: var(--primary); color: var(--primary); background: rgba(27,94,32,.06); }
 .tool-btn:hover { border-color: var(--primary-light); }
-
-/* Scale ref indicator */
-.scale-indicator {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--bg);
-  border-radius: 8px;
-  padding: 8px 12px;
-  margin-top: 8px;
-  font-size: 12px;
-}
-.scale-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.scale-dot.red { background: #e53935; }
-.scale-dot.blue { background: #1e88e5; }
-.scale-dot.green { background: var(--primary-light); }
-.scale-dot.orange { background: var(--accent); }
 </style>
 </head>
 <body>
 
-<!-- Header -->
 <div class="header">
   <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
     <rect width="36" height="36" rx="8" fill="rgba(255,255,255,.15)"/>
@@ -532,15 +209,14 @@ body {
   </svg>
   <div>
     <h1>PesoVivo</h1>
-    <small>Estimativa de peso bovino por foto</small>
+    <small>Estimativa de peso animal por foto ou fita</small>
   </div>
 </div>
 
-<!-- Tabs -->
 <div class="tabs">
   <button class="tab active" onclick="showScreen('medir')" id="tab-medir">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
-    Nova Medição
+    Medir
   </button>
   <button class="tab" onclick="showScreen('historico')" id="tab-historico">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
@@ -552,101 +228,77 @@ body {
   </button>
 </div>
 
-<!-- Screen: Nova Medição -->
+<!-- SCREEN: MEDIR -->
 <div class="screen active" id="screen-medir">
 
-  <!-- Modo de medição -->
+  <!-- Espécie -->
+  <div class="card" id="card-especie">
+    <h3>Espécie</h3>
+    <div class="category-grid tri">
+      <div class="category-item selected" id="sp-bovino" onclick="setEspecie('bovino')">
+        <span class="icon">🐄</span><strong>Bovino</strong>
+      </div>
+      <div class="category-item" id="sp-cao" onclick="setEspecie('cao')">
+        <span class="icon">🐕</span><strong>Cão</strong>
+      </div>
+      <div class="category-item" id="sp-gato" onclick="setEspecie('gato')">
+        <span class="icon">🐈</span><strong>Gato</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modo -->
   <div class="card" id="card-modo">
-    <h3>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-      Escolha o Modo
-    </h3>
+    <h3>Modo de Medição</h3>
     <div class="category-grid">
       <div class="category-item selected" id="modo-foto" onclick="setModo('foto')">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <strong>Por Foto</strong>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Marque medidas na imagem</div>
+        <span class="icon">📷</span><strong>Por Foto</strong>
+        <div style="font-size:11px;color:var(--muted);">Marque na imagem</div>
       </div>
       <div class="category-item" id="modo-manual" onclick="setModo('manual')">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 20h4L19.5 8.5a2.12 2.12 0 00-3-3L5 17v3z"/><path d="M15 6l3 3"/></svg>
-        <strong>Manual</strong>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Digite PT e CC com fita métrica</div>
+        <span class="icon">📏</span><strong>Manual</strong>
+        <div style="font-size:11px;color:var(--muted);">Digite com fita métrica</div>
       </div>
     </div>
   </div>
 
-  <!-- MODO MANUAL -->
+  <!-- MANUAL -->
   <div class="card" id="card-manual" style="display:none">
-    <h3>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M4 20h4L19.5 8.5a2.12 2.12 0 00-3-3L5 17v3z"/></svg>
-      Medidas com Fita Métrica
-    </h3>
-
-    <div class="info-box">
+    <h3>Medidas com Fita Métrica</h3>
+    <div class="info-box" id="manualInfo">
       Use uma fita métrica para medir diretamente no animal. Este é o método mais preciso.
     </div>
-
     <div class="form-group">
-      <label>Perímetro Torácico — PT (cm)</label>
-      <input type="number" id="manualPT" placeholder="Ex: 180 (circunferência atrás da paleta)" min="50" max="350" oninput="checkManualCalc()">
-      <small style="color:var(--muted);font-size:11px;">Passe a fita ao redor do tórax, logo atrás das patas dianteiras</small>
+      <label id="lblManualPT">Perímetro Torácico — PT (cm)</label>
+      <input type="number" id="manualPT" placeholder="Ex: 180" min="5" max="350" oninput="checkManualCalc()">
+      <small id="helpManualPT" style="color:var(--muted);font-size:11px;">Passe a fita ao redor do tórax, logo atrás das patas dianteiras</small>
     </div>
-
     <div class="form-group">
-      <label>Comprimento Corporal — CC (cm)</label>
-      <input type="number" id="manualCC" placeholder="Ex: 140 (ombro ao ísquio)" min="30" max="300" oninput="checkManualCalc()">
-      <small style="color:var(--muted);font-size:11px;">Da ponta do ombro à ponta do ísquio (traseira)</small>
+      <label id="lblManualCC">Comprimento Corporal — CC (cm)</label>
+      <input type="number" id="manualCC" placeholder="Ex: 140" min="5" max="300" oninput="checkManualCalc()">
+      <small id="helpManualCC" style="color:var(--muted);font-size:11px;">Da ponta do ombro à ponta do ísquio</small>
     </div>
-
     <div class="form-group">
       <label>Raça</label>
-      <select id="manualRaca">
-        <option value="nelore">Nelore</option>
-        <option value="angus">Angus</option>
-        <option value="brahman">Brahman</option>
-        <option value="girolando">Girolando</option>
-        <option value="hereford">Hereford</option>
-        <option value="tabapua">Tabapuã</option>
-        <option value="guzerá">Guzerá</option>
-        <option value="sindi">Sindi</option>
-        <option value="mestico">Mestiço / SRD</option>
-        <option value="outro">Outro</option>
-      </select>
+      <select id="manualRaca"></select>
     </div>
-
     <div class="form-group">
       <label>Sexo / Categoria</label>
-      <select id="manualSexo">
-        <option value="vaca">Vaca</option>
-        <option value="touro">Touro</option>
-        <option value="novilha">Novilha</option>
-        <option value="novilho">Novilho</option>
-        <option value="bezerro">Bezerro(a)</option>
-        <option value="boi">Boi (castrado)</option>
-      </select>
+      <select id="manualSexo"></select>
     </div>
-
     <div class="form-group">
       <label>Identificação (opcional)</label>
-      <input type="text" id="manualAnimalId" placeholder="Ex: Brinco 042, Estrela, Lote 3...">
+      <input type="text" id="manualAnimalId" placeholder="Ex: Brinco 042, Rex, Mimi...">
     </div>
-
-    <button class="btn btn-accent" id="btnCalcManual" onclick="calcularPesoManual()" disabled>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-      Calcular Peso Estimado
-    </button>
+    <button class="btn btn-accent" id="btnCalcManual" onclick="calcularPesoManual()" disabled>Calcular Peso Estimado</button>
   </div>
 
-  <!-- MODO FOTO: Step 1 -->
+  <!-- FOTO: Step 1 -->
   <div class="card" id="card-foto">
-    <h3>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-      1. Foto do Animal
-    </h3>
-    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">
+    <h3>1. Foto do Animal</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;" id="fotoInstrucao">
       Tire uma foto lateral do animal, com o corpo inteiro visível. Inclua um objeto de referência de tamanho conhecido (bastão, régua, etc.)
     </p>
-
     <div class="photo-area" id="photoArea">
       <div class="photo-placeholder" id="photoPlaceholder">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -656,47 +308,33 @@ body {
         <p>Escolha uma opção abaixo</p>
         <small>Vista lateral completa do animal</small>
         <div class="btn-row" style="margin-top:12px;">
-          <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();document.getElementById('photoCam').click()">
-            📷 Câmera
-          </button>
-          <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();document.getElementById('photoGal').click()">
-            🖼 Galeria
-          </button>
+          <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();document.getElementById('photoCam').click()">📷 Câmera</button>
+          <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();document.getElementById('photoGal').click()">🖼 Galeria</button>
         </div>
       </div>
     </div>
     <input type="file" id="photoCam" accept="image/*" capture="environment" style="display:none" onchange="loadPhoto(this)">
     <input type="file" id="photoGal" accept="image/*" style="display:none" onchange="loadPhoto(this)">
-
     <div class="btn-row" id="photoBtns" style="display:none">
       <button class="btn btn-outline btn-sm" onclick="resetPhoto()">Trocar Foto</button>
       <button class="btn btn-primary btn-sm" onclick="goToStep2()">Continuar</button>
     </div>
   </div>
 
-  <!-- MODO FOTO: Step 2 -->
+  <!-- FOTO: Step 2 -->
   <div class="card" id="card-medidas" style="display:none">
-    <h3>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M2 12h4M18 12h4M12 2v4M12 18v4"/><circle cx="12" cy="12" r="3"/></svg>
-      2. Marcar Medidas na Foto
-    </h3>
-
-    <div class="info-box">
-      Marque os pontos na foto seguindo as instruções abaixo. Cada medição requer <strong>2 toques</strong> (ponto inicial e final).
-    </div>
-
+    <h3>2. Marcar Medidas na Foto</h3>
+    <div class="info-box">Marque os pontos na foto. Cada medição requer <strong>2 toques</strong> (ponto inicial e final).</div>
     <div class="canvas-container" id="canvasContainer">
       <img id="canvasImg" src="">
       <canvas id="measureCanvas"></canvas>
     </div>
-
     <div class="canvas-toolbar" id="canvasToolbar">
       <button class="tool-btn active" id="tool-ref" onclick="setTool('ref')">📏 Referência</button>
       <button class="tool-btn" id="tool-torax" onclick="setTool('torax')">🔴 Tórax</button>
       <button class="tool-btn" id="tool-corpo" onclick="setTool('corpo')">🔵 Comprimento</button>
       <button class="tool-btn" id="tool-undo" onclick="undoLastPoint()">↩ Desfazer</button>
     </div>
-
     <div class="steps" id="measureSteps">
       <div class="step-item" id="step-ref">
         <div class="step-num active" id="stepnum-ref">1</div>
@@ -709,97 +347,59 @@ body {
       <div class="step-item" id="step-torax">
         <div class="step-num pending" id="stepnum-torax">2</div>
         <div class="step-text">
-          <strong>Altura do tórax</strong>
-          <small>Marque o topo do dorso e a base do peito, atrás da paleta</small>
+          <strong id="stepTitle-torax">Altura do tórax</strong>
+          <small id="stepHelp-torax">Marque o topo do dorso e a base do peito, atrás da paleta</small>
         </div>
         <div class="step-value" id="stepval-torax">—</div>
       </div>
       <div class="step-item" id="step-corpo">
         <div class="step-num pending" id="stepnum-corpo">3</div>
         <div class="step-text">
-          <strong>Comprimento corporal</strong>
-          <small>Da ponta do ombro até a ponta do ísquio</small>
+          <strong id="stepTitle-corpo">Comprimento corporal</strong>
+          <small id="stepHelp-corpo">Da ponta do ombro até a ponta do ísquio</small>
         </div>
         <div class="step-value" id="stepval-corpo">—</div>
       </div>
     </div>
-
-    <div class="form-group" id="refSizeGroup">
+    <div class="form-group">
       <label>Tamanho real do objeto de referência (cm)</label>
       <input type="number" id="refSize" placeholder="Ex: 100 (bastão de 1m)" value="100" min="1" max="500">
     </div>
-
     <div class="form-group">
       <label>Raça</label>
-      <select id="animalCategory">
-        <option value="nelore">Nelore</option>
-        <option value="angus">Angus</option>
-        <option value="brahman">Brahman</option>
-        <option value="girolando">Girolando</option>
-        <option value="hereford">Hereford</option>
-        <option value="tabapua">Tabapuã</option>
-        <option value="guzerá">Guzerá</option>
-        <option value="sindi">Sindi</option>
-        <option value="mestico">Mestiço / SRD</option>
-        <option value="outro">Outro</option>
-      </select>
+      <select id="animalCategory"></select>
     </div>
-
     <div class="form-group">
       <label>Sexo / Categoria</label>
-      <select id="animalSex">
-        <option value="vaca">Vaca</option>
-        <option value="touro">Touro</option>
-        <option value="novilha">Novilha</option>
-        <option value="novilho">Novilho</option>
-        <option value="bezerro">Bezerro(a)</option>
-        <option value="boi">Boi (castrado)</option>
-      </select>
+      <select id="animalSex"></select>
     </div>
-
     <div class="form-group">
       <label>Identificação (opcional)</label>
-      <input type="text" id="animalId" placeholder="Ex: Brinco 042, Estrela, Lote 3...">
+      <input type="text" id="animalId" placeholder="Ex: Brinco 042, Rex, Mimi...">
     </div>
-
-    <button class="btn btn-accent" id="btnCalc" onclick="calcularPeso()" disabled>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-      Calcular Peso Estimado
-    </button>
+    <button class="btn btn-accent" id="btnCalc" onclick="calcularPeso()" disabled>Calcular Peso Estimado</button>
   </div>
 
-  <!-- Result -->
+  <!-- Resultado -->
   <div id="resultArea" style="display:none">
-    <div class="result-box" id="resultBox">
+    <div class="result-box">
       <div style="font-size:12px;opacity:.7;margin-bottom:4px;">PESO ESTIMADO</div>
       <div class="result-weight" id="resultWeight">—</div>
-      <div class="result-unit">kg</div>
+      <div class="result-unit" id="resultUnit">kg</div>
       <div class="result-range" id="resultRange"></div>
       <div class="result-details">
-        <div class="result-detail">
-          <div class="val" id="resTorax">—</div>
-          <div class="lbl">Perím. Torácico</div>
-        </div>
-        <div class="result-detail">
-          <div class="val" id="resCorpo">—</div>
-          <div class="lbl">Compr. Corporal</div>
-        </div>
+        <div class="result-detail"><div class="val" id="resTorax">—</div><div class="lbl" id="resToraxLbl">Perím. Torácico</div></div>
+        <div class="result-detail"><div class="val" id="resCorpo">—</div><div class="lbl">Compr. Corporal</div></div>
       </div>
       <div class="result-formula" id="resultFormula"></div>
     </div>
-
     <div class="card">
-      <h3>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        Detalhes
-      </h3>
+      <h3>Detalhes</h3>
       <div id="resultDetails" style="font-size:13px; line-height:1.8;"></div>
     </div>
-
-    <div class="warning-box">
-      <strong>Atenção:</strong> Esta é uma estimativa baseada em fórmulas zootécnicas. Para pesagem oficial, utilize balança mecânica ou digital. Margem de erro típica: ±8-15%.
+    <div class="warning-box" id="resultDisclaimer">
+      <strong>Atenção:</strong> Esta é uma estimativa baseada em fórmulas biométricas. Para pesagem oficial, utilize balança. Margem de erro típica: ±10-15%.
     </div>
-
     <div class="btn-row">
       <button class="btn btn-outline" onclick="novaMedicao()">Nova Medição</button>
       <button class="btn btn-primary" onclick="compartilhar()">Compartilhar</button>
@@ -807,107 +407,74 @@ body {
   </div>
 </div>
 
-<!-- Screen: Histórico -->
+<!-- SCREEN: HISTÓRICO -->
 <div class="screen" id="screen-historico">
   <div class="card">
-    <h3>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
-      Histórico de Pesagens
-    </h3>
+    <h3>Histórico de Pesagens</h3>
     <div id="historyList">
       <div class="history-empty">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/>
-        </svg>
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
         <p>Nenhuma pesagem registrada</p>
-        <small>As pesagens aparecerão aqui</small>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Screen: Guia -->
+<!-- SCREEN: GUIA -->
 <div class="screen" id="screen-guia">
   <div class="card">
-    <h3>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v.01M12 8a2 2 0 011.7 3.04L12 13"/></svg>
-      Como Funciona
-    </h3>
+    <h3>Como Funciona</h3>
     <p style="font-size:13px;line-height:1.7;color:var(--muted);">
-      O <strong>PesoVivo</strong> estima o peso de bovinos usando a <strong>fórmula de Schaeffer</strong> e variações, amplamente utilizadas na zootecnia. Você pode medir com <strong>fita métrica</strong> (mais preciso) ou <strong>pela foto</strong> marcando pontos na imagem. Precisão de ±8-15%.
+      O <strong>PesoVivo</strong> estima o peso de <strong>bovinos, cães e gatos</strong> usando fórmulas biométricas baseadas em duas medidas corporais: o <strong>perímetro torácico (PT)</strong> e o <strong>comprimento corporal (CC)</strong>. Você pode medir com <strong>fita métrica</strong> (mais preciso) ou <strong>pela foto</strong>.
     </p>
   </div>
 
   <div class="card">
-    <h3>📏 As Medidas</h3>
-    <div class="steps">
-      <div class="step-item">
-        <div class="step-num done">A</div>
-        <div class="step-text">
-          <strong>Perímetro Torácico (PT)</strong>
-          <small>Circunferência do tórax logo atrás da paleta (escápula). Na foto, marcamos a altura visível do tórax e aplicamos o fator π para estimar o perímetro.</small>
-        </div>
-      </div>
-      <div class="step-item">
-        <div class="step-num done">B</div>
-        <div class="step-text">
-          <strong>Comprimento Corporal (CC)</strong>
-          <small>Distância da ponta do ombro (articulação escápulo-umeral) até a ponta do ísquio (tuberosidade isquiática).</small>
-        </div>
+    <h3>🐄 Bovinos</h3>
+    <div style="font-size:12px;line-height:1.8;color:var(--muted);">
+      <p><strong>Fórmula de Schaeffer (taurinos):</strong></p>
+      <p style="background:var(--bg);padding:8px;border-radius:6px;font-family:monospace;margin:4px 0 8px;">Peso = PT² × CC ÷ 10.840</p>
+      <p><strong>Quetelet (zebuínos):</strong></p>
+      <p style="background:var(--bg);padding:8px;border-radius:6px;font-family:monospace;margin:4px 0 8px;">Peso = PT² × CC ÷ 10.600</p>
+      <p><strong>PT</strong> = circunferência do tórax atrás da paleta. <strong>CC</strong> = ombro ao ísquio.</p>
+      <p style="margin-top:6px;"><strong>No modo foto:</strong> altura visível × <strong>2,65</strong> (fator elíptico) = PT estimado.</p>
+      <div style="margin-top:8px;">
+        <span class="race-badge" style="background:#4caf50">Nelore ×0.97</span>
+        <span class="race-badge" style="background:#2196f3">Angus ×1.03</span>
+        <span class="race-badge" style="background:#ff9800">Brahman ×0.98</span>
+        <span class="race-badge" style="background:#f44336">Hereford ×1.04</span>
       </div>
     </div>
   </div>
 
   <div class="card">
-    <h3>📐 Fórmulas Utilizadas</h3>
+    <h3>🐕 Cães</h3>
     <div style="font-size:12px;line-height:1.8;color:var(--muted);">
-      <p><strong>Schaeffer (taurinos):</strong></p>
-      <p style="background:var(--bg);padding:8px;border-radius:6px;font-family:monospace;margin:4px 0 12px;">
-        Peso = PT² × CC ÷ 10.840
-      </p>
-      <p><strong>Quetelet (zebuínos):</strong></p>
-      <p style="background:var(--bg);padding:8px;border-radius:6px;font-family:monospace;margin:4px 0 12px;">
-        Peso = PT² × CC ÷ 10.600
-      </p>
-      <p>Onde PT = perímetro torácico em cm e CC = comprimento corporal em cm.</p>
-      <p style="margin-top:8px;"><strong>No modo foto:</strong> a altura visível do tórax é multiplicada por <strong>2,65</strong> (fator elíptico bovino) para estimar o perímetro, já que o corte transversal do tórax bovino é elíptico, não circular.</p>
+      <p><strong>Fórmula adaptada:</strong></p>
+      <p style="background:var(--bg);padding:8px;border-radius:6px;font-family:monospace;margin:4px 0 8px;">Peso = PT² × CC ÷ K</p>
+      <p>K varia por porte: <strong>pequeno</strong> (K=12.800), <strong>médio</strong> (K=11.800), <strong>grande</strong> (K=10.900).</p>
+      <p><strong>PT</strong> = circunferência do tórax atrás das patas dianteiras. <strong>CC</strong> = base do pescoço à base da cauda.</p>
+      <p style="margin-top:6px;"><strong>No modo foto:</strong> altura visível × <strong>2,80</strong> (fator canino) = PT estimado.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🐈 Gatos</h3>
+    <div style="font-size:12px;line-height:1.8;color:var(--muted);">
+      <p><strong>Fórmula adaptada:</strong></p>
+      <p style="background:var(--bg);padding:8px;border-radius:6px;font-family:monospace;margin:4px 0 8px;">Peso = PT² × CC ÷ 14.000</p>
+      <p><strong>PT</strong> = circunferência do tórax. <strong>CC</strong> = base do pescoço à base da cauda.</p>
+      <p style="margin-top:6px;"><strong>No modo foto:</strong> altura visível × <strong>3,0</strong> (fator felino) = PT estimado.</p>
     </div>
   </div>
 
   <div class="card">
     <h3>📸 Dicas para Melhor Precisão</h3>
     <div class="guide-grid">
-      <div class="guide-step">
-        <strong>Vista lateral</strong>
-        Posicione-se ao lado do animal, perpendicular ao corpo
-      </div>
-      <div class="guide-step">
-        <strong>Referência</strong>
-        Inclua bastão ou régua de tamanho conhecido na foto
-      </div>
-      <div class="guide-step">
-        <strong>Iluminação</strong>
-        Prefira luz natural e evite contra-luz
-      </div>
-      <div class="guide-step">
-        <strong>Distância</strong>
-        Mantenha distância que mostre o corpo inteiro
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h3>🐄 Fatores de Correção por Raça</h3>
-    <div style="font-size:12px;line-height:1.8;color:var(--muted);">
-      <p>Raças zebuínas (Nelore, Brahman, Guzerá, Tabapuã, Sindi) tendem a ter menor rendimento de carcaça e estrutura corporal mais angular. O app aplica automaticamente fatores de ajuste:</p>
-      <div style="margin-top:8px;">
-        <span class="race-badge" style="background:#4caf50">Nelore ×0.97</span>
-        <span class="race-badge" style="background:#2196f3">Angus ×1.03</span>
-        <span class="race-badge" style="background:#ff9800">Brahman ×0.98</span>
-        <span class="race-badge" style="background:#9c27b0">Girolando ×1.00</span>
-        <span class="race-badge" style="background:#f44336">Hereford ×1.04</span>
-        <span class="race-badge" style="background:#795548">Mestiço ×1.00</span>
-      </div>
+      <div class="guide-step"><strong>Vista lateral</strong>Posicione-se ao lado, perpendicular ao corpo</div>
+      <div class="guide-step"><strong>Referência</strong>Inclua objeto de tamanho conhecido na foto</div>
+      <div class="guide-step"><strong>Iluminação</strong>Prefira luz natural, evite contra-luz</div>
+      <div class="guide-step"><strong>Corpo inteiro</strong>O animal deve estar de pé, corpo todo visível</div>
     </div>
   </div>
 
@@ -917,18 +484,15 @@ body {
       <ul style="padding-left:16px;">
         <li>Estimativa, não substitui balança</li>
         <li>Precisão depende da qualidade da foto e marcação</li>
-        <li>Animais gestantes podem apresentar desvio maior</li>
-        <li>Melhor resultado em animais adultos</li>
-        <li>Margem de erro: ±8-15% (similar à fita de pesagem)</li>
+        <li>Fêmeas gestantes podem apresentar desvio maior</li>
+        <li>Modo manual com fita métrica é mais preciso que a foto</li>
+        <li>Margem de erro: ±10-15%</li>
       </ul>
     </div>
   </div>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
-
-<!-- Instruction overlay -->
 <div class="instruction-overlay" id="instructionOverlay">
   <div class="instruction-card">
     <h3 id="instrTitle">Instrução</h3>
@@ -938,62 +502,213 @@ body {
 </div>
 
 <script>
+const SPECIES_CONFIG = {
+  bovino: {
+    emoji: '🐄',
+    label: 'Bovino',
+    toraxFactor: 2.65,
+    racas: {
+      nelore: { nome: 'Nelore', fator: 0.97, zebu: true },
+      angus: { nome: 'Angus', fator: 1.03 },
+      brahman: { nome: 'Brahman', fator: 0.98, zebu: true },
+      girolando: { nome: 'Girolando', fator: 1.00 },
+      hereford: { nome: 'Hereford', fator: 1.04 },
+      tabapua: { nome: 'Tabapuã', fator: 0.97, zebu: true },
+      guzera: { nome: 'Guzerá', fator: 0.96, zebu: true },
+      sindi: { nome: 'Sindi', fator: 0.95, zebu: true },
+      mestico: { nome: 'Mestiço / SRD', fator: 1.00 },
+      outro: { nome: 'Outro', fator: 1.00 }
+    },
+    sexos: {
+      vaca: { nome: 'Vaca', fator: 1.00 },
+      touro: { nome: 'Touro', fator: 1.08 },
+      novilha: { nome: 'Novilha', fator: 0.97 },
+      novilho: { nome: 'Novilho', fator: 1.02 },
+      bezerro: { nome: 'Bezerro(a)', fator: 0.90 },
+      boi: { nome: 'Boi (castrado)', fator: 1.04 }
+    },
+    getDivisor: function(raca) {
+      return (this.racas[raca] && this.racas[raca].zebu) ? 10600 : 10840;
+    },
+    getFormulaName: function(raca) {
+      return (this.racas[raca] && this.racas[raca].zebu) ? 'Quetelet (zebuínos)' : 'Schaeffer (taurinos)';
+    },
+    ptLabel: 'Perímetro Torácico — PT (cm)',
+    ptHelp: 'Passe a fita ao redor do tórax, logo atrás das patas dianteiras',
+    ccLabel: 'Comprimento Corporal — CC (cm)',
+    ccHelp: 'Da ponta do ombro à ponta do ísquio (traseira)',
+    stepToraxTitle: 'Altura do tórax',
+    stepToraxHelp: 'Marque o topo do dorso e a base do peito, atrás da paleta',
+    stepCorpoTitle: 'Comprimento corporal',
+    stepCorpoHelp: 'Da ponta do ombro até a ponta do ísquio',
+    sanity: function(peso, sexo) {
+      if (sexo === 'bezerro' && peso > 300) return 'Peso alto para bezerro. Verifique as medidas.';
+      if (sexo !== 'bezerro' && peso < 100) return 'Peso muito baixo para bovino adulto. Verifique as medidas.';
+      if (peso > 1200) return 'Peso acima de 1.200 kg. Verifique as medidas.';
+      return '';
+    }
+  },
+  cao: {
+    emoji: '🐕',
+    label: 'Cão',
+    toraxFactor: 2.80,
+    racas: {
+      pp_srd: { nome: 'Pequeno porte - SRD', fator: 1.00, porte: 'p' },
+      pp_pinscher: { nome: 'Pinscher', fator: 0.95, porte: 'p' },
+      pp_yorkshire: { nome: 'Yorkshire', fator: 0.95, porte: 'p' },
+      pp_shih_tzu: { nome: 'Shih Tzu', fator: 1.02, porte: 'p' },
+      pp_poodle_toy: { nome: 'Poodle Toy/Mini', fator: 0.98, porte: 'p' },
+      pp_chihuahua: { nome: 'Chihuahua', fator: 0.90, porte: 'p' },
+      pp_lhasa: { nome: 'Lhasa Apso', fator: 1.00, porte: 'p' },
+      mp_srd: { nome: 'Médio porte - SRD', fator: 1.00, porte: 'm' },
+      mp_bulldog: { nome: 'Bulldog Francês/Inglês', fator: 1.10, porte: 'm' },
+      mp_cocker: { nome: 'Cocker Spaniel', fator: 1.02, porte: 'm' },
+      mp_beagle: { nome: 'Beagle', fator: 1.00, porte: 'm' },
+      mp_border: { nome: 'Border Collie', fator: 0.98, porte: 'm' },
+      mp_poodle: { nome: 'Poodle Médio', fator: 0.98, porte: 'm' },
+      gp_srd: { nome: 'Grande porte - SRD', fator: 1.00, porte: 'g' },
+      gp_labrador: { nome: 'Labrador', fator: 1.03, porte: 'g' },
+      gp_golden: { nome: 'Golden Retriever', fator: 1.03, porte: 'g' },
+      gp_pastor: { nome: 'Pastor Alemão', fator: 1.00, porte: 'g' },
+      gp_rottweiler: { nome: 'Rottweiler', fator: 1.08, porte: 'g' },
+      gp_pitbull: { nome: 'Pit Bull', fator: 1.06, porte: 'g' },
+      gp_dogue: { nome: 'Dogue Alemão', fator: 1.00, porte: 'g' },
+      outro: { nome: 'Outro', fator: 1.00, porte: 'm' }
+    },
+    sexos: {
+      femea: { nome: 'Fêmea', fator: 0.95 },
+      macho: { nome: 'Macho', fator: 1.05 },
+      femea_castrada: { nome: 'Fêmea castrada', fator: 0.97 },
+      macho_castrado: { nome: 'Macho castrado', fator: 1.03 },
+      filhote: { nome: 'Filhote', fator: 0.85 }
+    },
+    getDivisor: function(raca) {
+      const r = this.racas[raca];
+      if (!r) return 11800;
+      if (r.porte === 'p') return 12800;
+      if (r.porte === 'g') return 10900;
+      return 11800;
+    },
+    getFormulaName: function(raca) {
+      const r = this.racas[raca];
+      if (!r) return 'Biométrica canina (médio)';
+      const portes = { p: 'pequeno', m: 'médio', g: 'grande' };
+      return 'Biométrica canina (' + (portes[r.porte] || 'médio') + ')';
+    },
+    ptLabel: 'Perímetro Torácico — PT (cm)',
+    ptHelp: 'Passe a fita ao redor do peito, logo atrás das patas dianteiras',
+    ccLabel: 'Comprimento Corporal — CC (cm)',
+    ccHelp: 'Da base do pescoço (cernelha) até a base da cauda',
+    stepToraxTitle: 'Altura do tórax',
+    stepToraxHelp: 'Marque o topo do dorso e a base do peito, atrás das patas dianteiras',
+    stepCorpoTitle: 'Comprimento corporal',
+    stepCorpoHelp: 'Da base do pescoço até a base da cauda',
+    sanity: function(peso, sexo) {
+      if (sexo === 'filhote' && peso > 25) return 'Peso alto para filhote. Verifique as medidas.';
+      if (peso < 0.5) return 'Peso muito baixo. Verifique as medidas e a escala de referência.';
+      if (peso > 90) return 'Peso acima de 90 kg. Verifique as medidas.';
+      return '';
+    }
+  },
+  gato: {
+    emoji: '🐈',
+    label: 'Gato',
+    toraxFactor: 3.0,
+    racas: {
+      srd: { nome: 'SRD (Vira-lata)', fator: 1.00 },
+      persa: { nome: 'Persa', fator: 1.05 },
+      siames: { nome: 'Siamês', fator: 0.92 },
+      maine_coon: { nome: 'Maine Coon', fator: 1.15 },
+      ragdoll: { nome: 'Ragdoll', fator: 1.10 },
+      british: { nome: 'British Shorthair', fator: 1.08 },
+      bengal: { nome: 'Bengal', fator: 1.02 },
+      angorá: { nome: 'Angorá', fator: 0.95 },
+      scottish: { nome: 'Scottish Fold', fator: 1.03 },
+      sphynx: { nome: 'Sphynx', fator: 0.90 },
+      outro: { nome: 'Outro', fator: 1.00 }
+    },
+    sexos: {
+      femea: { nome: 'Fêmea', fator: 0.90 },
+      macho: { nome: 'Macho', fator: 1.10 },
+      femea_castrada: { nome: 'Fêmea castrada', fator: 0.95 },
+      macho_castrado: { nome: 'Macho castrado', fator: 1.05 },
+      filhote: { nome: 'Filhote', fator: 0.80 }
+    },
+    getDivisor: function() { return 14000; },
+    getFormulaName: function() { return 'Biométrica felina'; },
+    ptLabel: 'Perímetro Torácico — PT (cm)',
+    ptHelp: 'Passe a fita ao redor do peito, logo atrás das patas dianteiras',
+    ccLabel: 'Comprimento Corporal — CC (cm)',
+    ccHelp: 'Da base do pescoço até a base da cauda',
+    stepToraxTitle: 'Altura do tórax',
+    stepToraxHelp: 'Marque o topo do dorso e a base do peito',
+    stepCorpoTitle: 'Comprimento corporal',
+    stepCorpoHelp: 'Da base do pescoço até a base da cauda',
+    sanity: function(peso, sexo) {
+      if (sexo === 'filhote' && peso > 4) return 'Peso alto para filhote. Verifique as medidas.';
+      if (peso < 0.3) return 'Peso muito baixo. Verifique as medidas e a escala de referência.';
+      if (peso > 15) return 'Peso acima de 15 kg (raro em gatos). Verifique as medidas.';
+      return '';
+    }
+  }
+};
+
+const COLORS = { ref: '#4caf50', torax: '#e53935', corpo: '#1e88e5' };
+const LABELS = { ref: 'Referência', torax: 'Tórax', corpo: 'Comprimento' };
+
 const state = {
+  especie: 'bovino',
   modo: 'foto',
-  photo: null,
   photoDataUrl: null,
-  imgWidth: 0,
-  imgHeight: 0,
-  displayWidth: 0,
-  displayHeight: 0,
+  imgWidth: 0, imgHeight: 0,
+  displayWidth: 0, displayHeight: 0,
   currentTool: 'ref',
   points: { ref: [], torax: [], corpo: [] },
   pixelDistances: { ref: 0, torax: 0, corpo: 0 },
-  realDistances: { torax: 0, corpo: 0 },
   scale: 0,
-  history: JSON.parse(localStorage.getItem('pesovivo_history') || '[]')
+  history: []
 };
 
-const COLORS = {
-  ref: '#4caf50',
-  torax: '#e53935',
-  corpo: '#1e88e5'
-};
+try { state.history = JSON.parse(localStorage.getItem('pesovivo_history') || '[]'); } catch(e) { state.history = []; }
 
-const LABELS = {
-  ref: 'Referência',
-  torax: 'Tórax',
-  corpo: 'Comprimento'
-};
+function cfg() { return SPECIES_CONFIG[state.especie]; }
 
-const RACE_FACTORS = {
-  nelore: 0.97,
-  angus: 1.03,
-  brahman: 0.98,
-  girolando: 1.00,
-  hereford: 1.04,
-  tabapua: 0.97,
-  'guzerá': 0.96,
-  sindi: 0.95,
-  mestico: 1.00,
-  outro: 1.00
-};
+function populateSelects() {
+  const c = cfg();
+  ['manualRaca', 'animalCategory'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = Object.entries(c.racas).map(([k,v]) =>
+      '<option value="' + k + '">' + v.nome + '</option>'
+    ).join('');
+  });
+  ['manualSexo', 'animalSex'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = Object.entries(c.sexos).map(([k,v]) =>
+      '<option value="' + k + '">' + v.nome + '</option>'
+    ).join('');
+  });
+}
 
-const SEX_FACTORS = {
-  vaca: 1.00,
-  touro: 1.08,
-  novilha: 0.97,
-  novilho: 1.02,
-  bezerro: 0.90,
-  boi: 1.04
-};
+function updateLabels() {
+  const c = cfg();
+  document.getElementById('lblManualPT').textContent = c.ptLabel;
+  document.getElementById('helpManualPT').textContent = c.ptHelp;
+  document.getElementById('lblManualCC').textContent = c.ccLabel;
+  document.getElementById('helpManualCC').textContent = c.ccHelp;
+  document.getElementById('stepTitle-torax').textContent = c.stepToraxTitle;
+  document.getElementById('stepHelp-torax').textContent = c.stepToraxHelp;
+  document.getElementById('stepTitle-corpo').textContent = c.stepCorpoTitle;
+  document.getElementById('stepHelp-corpo').textContent = c.stepCorpoHelp;
+}
 
-function showScreen(name) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('screen-' + name).classList.add('active');
-  document.getElementById('tab-' + name).classList.add('active');
-  if (name === 'historico') renderHistory();
+function setEspecie(sp) {
+  state.especie = sp;
+  ['bovino','cao','gato'].forEach(s => {
+    document.getElementById('sp-' + s).classList.toggle('selected', s === sp);
+  });
+  populateSelects();
+  updateLabels();
+  novaMedicao();
 }
 
 function setModo(modo) {
@@ -1004,6 +719,21 @@ function setModo(modo) {
   document.getElementById('card-manual').style.display = modo === 'manual' ? 'block' : 'none';
   document.getElementById('card-medidas').style.display = 'none';
   document.getElementById('resultArea').style.display = 'none';
+}
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'historico') renderHistory();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
 }
 
 function checkManualCalc() {
@@ -1021,17 +751,9 @@ function calcularPesoManual() {
   calcularPesoComum(pt, cc, raca, sexo, id, 'manual', 0);
 }
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
-
 function loadPhoto(input) {
   const file = input.files[0];
   if (!file) return;
-
   const reader = new FileReader();
   reader.onload = function(e) {
     state.photoDataUrl = e.target.result;
@@ -1039,14 +761,10 @@ function loadPhoto(input) {
     img.onload = function() {
       state.imgWidth = img.naturalWidth;
       state.imgHeight = img.naturalHeight;
-
       const area = document.getElementById('photoArea');
       area.classList.add('has-image');
-      area.onclick = null;
       area.innerHTML = '<img src="' + state.photoDataUrl + '" alt="Foto do animal">';
-
       document.getElementById('photoBtns').style.display = 'flex';
-      document.getElementById('photoPlaceholder')?.remove();
     };
     img.src = e.target.result;
   };
@@ -1057,23 +775,15 @@ function resetPhoto() {
   state.photoDataUrl = null;
   const area = document.getElementById('photoArea');
   area.classList.remove('has-image');
-  area.onclick = null;
-  area.innerHTML = `<div class="photo-placeholder" id="photoPlaceholder">
-    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-      <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
-      <circle cx="12" cy="13" r="4"/>
-    </svg>
-    <p>Escolha uma opção abaixo</p>
-    <small>Vista lateral completa do animal</small>
-    <div class="btn-row" style="margin-top:12px;">
-      <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();document.getElementById('photoCam').click()">
-        📷 Câmera
-      </button>
-      <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();document.getElementById('photoGal').click()">
-        🖼 Galeria
-      </button>
-    </div>
-  </div>`;
+  area.innerHTML = '<div class="photo-placeholder" id="photoPlaceholder">' +
+    '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' +
+    '<path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>' +
+    '<circle cx="12" cy="13" r="4"/></svg>' +
+    '<p>Escolha uma opção abaixo</p><small>Vista lateral completa do animal</small>' +
+    '<div class="btn-row" style="margin-top:12px;">' +
+    '<button class="btn btn-primary btn-sm" onclick="event.stopPropagation();document.getElementById(\'photoCam\').click()">📷 Câmera</button>' +
+    '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();document.getElementById(\'photoGal\').click()">🖼 Galeria</button>' +
+    '</div></div>';
   document.getElementById('photoBtns').style.display = 'none';
   document.getElementById('photoCam').value = '';
   document.getElementById('photoGal').value = '';
@@ -1085,7 +795,6 @@ function goToStep2() {
   const cImg = document.getElementById('canvasImg');
   cImg.src = state.photoDataUrl;
   container.style.display = 'block';
-
   cImg.onload = function() {
     const canvas = document.getElementById('measureCanvas');
     state.displayWidth = cImg.clientWidth;
@@ -1096,85 +805,57 @@ function goToStep2() {
     canvas.style.height = cImg.clientHeight + 'px';
     setupCanvas(canvas);
   };
-
   state.points = { ref: [], torax: [], corpo: [] };
+  state.pixelDistances = { ref: 0, torax: 0, corpo: 0 };
   state.currentTool = 'ref';
   updateToolbar();
   updateSteps();
-
   showInstruction('Referência de Escala',
-    'Primeiro, marque as duas extremidades de um objeto de tamanho conhecido na foto (bastão, régua, poste, etc.). Isso permite calcular a escala real.');
-
+    'Primeiro, marque as duas extremidades de um objeto de tamanho conhecido na foto (bastão, régua, caneta, etc.). Isso permite calcular a escala real.');
   document.getElementById('card-medidas').scrollIntoView({ behavior: 'smooth' });
 }
 
 function setupCanvas(canvas) {
   canvas.addEventListener('click', function(e) {
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    addPoint(x, y);
+    addPoint(e.clientX - rect.left, e.clientY - rect.top);
   });
-
   canvas.addEventListener('touchend', function(e) {
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
-    const touch = e.changedTouches[0];
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
-    addPoint(x, y);
+    const t = e.changedTouches[0];
+    addPoint(t.clientX - rect.left, t.clientY - rect.top);
   });
 }
 
 function addPoint(x, y) {
   const tool = state.currentTool;
   if (state.points[tool].length >= 2) return;
-
   state.points[tool].push({ x, y });
-
   if (state.points[tool].length === 2) {
     const p = state.points[tool];
-    const dist = Math.sqrt(Math.pow(p[1].x - p[0].x, 2) + Math.pow(p[1].y - p[0].y, 2));
-    state.pixelDistances[tool] = dist;
-
-    if (tool === 'ref') {
-      showToast('Referência marcada!');
-      autoAdvanceTool('torax');
-    } else if (tool === 'torax') {
-      showToast('Tórax marcado!');
-      autoAdvanceTool('corpo');
-    } else {
-      showToast('Comprimento marcado!');
-    }
+    state.pixelDistances[tool] = Math.sqrt(Math.pow(p[1].x - p[0].x, 2) + Math.pow(p[1].y - p[0].y, 2));
+    if (tool === 'ref') { showToast('Referência marcada!'); autoAdvanceTool('torax'); }
+    else if (tool === 'torax') { showToast('Tórax marcado!'); autoAdvanceTool('corpo'); }
+    else { showToast('Comprimento marcado!'); }
   }
-
-  drawCanvas();
-  updateSteps();
-  checkCanCalc();
+  drawCanvas(); updateSteps(); checkCanCalc();
 }
 
 function autoAdvanceTool(next) {
+  const c = cfg();
   setTimeout(() => {
     state.currentTool = next;
     updateToolbar();
-
-    const instructions = {
-      torax: ['Perímetro Torácico', 'Marque dois pontos na vertical: o topo e a base do tórax, logo atrás da paleta (escápula). O app estimará o perímetro.'],
-      corpo: ['Comprimento Corporal', 'Marque a ponta do ombro (articulação) e a ponta do ísquio (traseira). Esta é a medida de comprimento corporal.']
-    };
-    if (instructions[next]) {
-      showInstruction(instructions[next][0], instructions[next][1]);
-    }
+    if (next === 'torax') showInstruction(c.stepToraxTitle, c.stepToraxHelp + '. Marque 2 pontos.');
+    if (next === 'corpo') showInstruction(c.stepCorpoTitle, c.stepCorpoHelp + '. Marque 2 pontos.');
   }, 400);
 }
 
-function setTool(tool) {
-  state.currentTool = tool;
-  updateToolbar();
-}
+function setTool(tool) { state.currentTool = tool; updateToolbar(); }
 
 function updateToolbar() {
-  ['ref', 'torax', 'corpo'].forEach(t => {
+  ['ref','torax','corpo'].forEach(t => {
     document.getElementById('tool-' + t).classList.toggle('active', t === state.currentTool);
   });
 }
@@ -1184,9 +865,7 @@ function undoLastPoint() {
   if (state.points[tool].length > 0) {
     state.points[tool].pop();
     state.pixelDistances[tool] = 0;
-    drawCanvas();
-    updateSteps();
-    checkCanCalc();
+    drawCanvas(); updateSteps(); checkCanCalc();
     showToast('Ponto removido');
   }
 }
@@ -1195,84 +874,51 @@ function drawCanvas() {
   const canvas = document.getElementById('measureCanvas');
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  ['ref', 'torax', 'corpo'].forEach(tool => {
+  ['ref','torax','corpo'].forEach(tool => {
     const pts = state.points[tool];
     const color = COLORS[tool];
-
     pts.forEach((p, i) => {
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
-      ctx.fillStyle = color;
-      ctx.fill();
-      ctx.strokeStyle = 'white';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      ctx.font = '10px sans-serif';
-      ctx.fillStyle = 'white';
-      ctx.strokeStyle = 'rgba(0,0,0,.6)';
-      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+      ctx.fillStyle = color; ctx.fill();
+      ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.font = '10px sans-serif'; ctx.fillStyle = 'white';
+      ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineWidth = 3;
       const label = LABELS[tool] + ' ' + (i + 1);
       ctx.strokeText(label, p.x + 10, p.y - 8);
       ctx.fillText(label, p.x + 10, p.y - 8);
     });
-
     if (pts.length === 2) {
-      ctx.beginPath();
-      ctx.moveTo(pts[0].x, pts[0].y);
-      ctx.lineTo(pts[1].x, pts[1].y);
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 2;
-      ctx.setLineDash([6, 4]);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      const mx = (pts[0].x + pts[1].x) / 2;
-      const my = (pts[0].y + pts[1].y) / 2;
+      ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y); ctx.lineTo(pts[1].x, pts[1].y);
+      ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.setLineDash([6, 4]); ctx.stroke(); ctx.setLineDash([]);
+      const mx = (pts[0].x + pts[1].x) / 2, my = (pts[0].y + pts[1].y) / 2;
       const dist = state.pixelDistances[tool];
-      const text = tool === 'ref'
-        ? dist.toFixed(0) + 'px'
+      const text = tool === 'ref' ? dist.toFixed(0) + 'px'
         : (state.scale > 0 ? (dist * state.scale).toFixed(1) + 'cm' : dist.toFixed(0) + 'px');
-
-      ctx.font = 'bold 11px sans-serif';
-      ctx.fillStyle = 'rgba(0,0,0,.7)';
+      ctx.font = 'bold 11px sans-serif'; ctx.fillStyle = 'rgba(0,0,0,.7)';
       const tw = ctx.measureText(text).width;
       ctx.fillRect(mx - tw / 2 - 4, my - 8, tw + 8, 16);
-      ctx.fillStyle = 'white';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(text, mx, my);
-      ctx.textAlign = 'start';
-      ctx.textBaseline = 'alphabetic';
+      ctx.fillStyle = 'white'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(text, mx, my); ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
     }
   });
 }
 
 function updateSteps() {
-  ['ref', 'torax', 'corpo'].forEach(tool => {
+  ['ref','torax','corpo'].forEach(tool => {
     const num = document.getElementById('stepnum-' + tool);
     const val = document.getElementById('stepval-' + tool);
     const pts = state.points[tool];
-
     if (pts.length === 2) {
       num.className = 'step-num done';
-      if (tool === 'ref') {
-        val.textContent = state.pixelDistances[tool].toFixed(0) + 'px';
-      } else if (state.scale > 0) {
-        val.textContent = (state.pixelDistances[tool] * state.scale).toFixed(1) + 'cm';
-      } else {
-        val.textContent = state.pixelDistances[tool].toFixed(0) + 'px';
-      }
+      val.textContent = tool === 'ref' ? state.pixelDistances[tool].toFixed(0) + 'px'
+        : (state.scale > 0 ? (state.pixelDistances[tool] * state.scale).toFixed(1) + 'cm' : state.pixelDistances[tool].toFixed(0) + 'px');
     } else if (tool === state.currentTool) {
       num.className = 'step-num active';
       val.textContent = pts.length === 1 ? '1/2' : '—';
     } else {
-      num.className = 'step-num pending';
-      val.textContent = '—';
+      num.className = 'step-num pending'; val.textContent = '—';
     }
   });
-
   const refSize = parseFloat(document.getElementById('refSize').value) || 100;
   if (state.pixelDistances.ref > 0) {
     state.scale = refSize / state.pixelDistances.ref;
@@ -1281,131 +927,99 @@ function updateSteps() {
 }
 
 function checkCanCalc() {
-  const ok = state.points.ref.length === 2 &&
-             state.points.torax.length === 2 &&
-             state.points.corpo.length === 2;
+  const ok = state.points.ref.length === 2 && state.points.torax.length === 2 && state.points.corpo.length === 2;
   document.getElementById('btnCalc').disabled = !ok;
 }
 
 function calcularPeso() {
+  const c = cfg();
   const refSize = parseFloat(document.getElementById('refSize').value) || 100;
   state.scale = refSize / state.pixelDistances.ref;
-
   const alturaTorax = state.pixelDistances.torax * state.scale;
-  const perimetroTorax = alturaTorax * 2.65;
+  const perimetroTorax = alturaTorax * c.toraxFactor;
   const compCorpo = state.pixelDistances.corpo * state.scale;
-
   const raca = document.getElementById('animalCategory').value;
   const sexo = document.getElementById('animalSex').value;
   const id = document.getElementById('animalId').value;
   calcularPesoComum(perimetroTorax, compCorpo, raca, sexo, id, 'foto', alturaTorax);
 }
 
-function calcularPesoComum(perimetroTorax, compCorpo, raca, sexo, id, modo, alturaTorax) {
-  const racaNames = {
-    nelore: 'Nelore', angus: 'Angus', brahman: 'Brahman',
-    girolando: 'Girolando', hereford: 'Hereford', tabapua: 'Tabapuã',
-    'guzerá': 'Guzerá', sindi: 'Sindi', mestico: 'Mestiço/SRD', outro: 'Outro'
-  };
-  const sexoNames = {
-    vaca: 'Vaca', touro: 'Touro', novilha: 'Novilha',
-    novilho: 'Novilho', bezerro: 'Bezerro(a)', boi: 'Boi (castrado)'
-  };
-
-  const isZebu = ['nelore', 'brahman', 'tabapua', 'guzerá', 'sindi'].includes(raca);
-  const divisor = isZebu ? 10600 : 10840;
-
-  let peso = (perimetroTorax * perimetroTorax * compCorpo) / divisor;
-
-  const fatorRaca = RACE_FACTORS[raca] || 1.0;
-  const fatorSexo = SEX_FACTORS[sexo] || 1.0;
-  peso *= fatorRaca * fatorSexo;
+function calcularPesoComum(pt, cc, raca, sexo, id, modo, alturaTorax) {
+  const c = cfg();
+  const racaData = c.racas[raca] || { nome: raca, fator: 1.0 };
+  const sexoData = c.sexos[sexo] || { nome: sexo, fator: 1.0 };
+  const divisor = c.getDivisor(raca);
+  let peso = (pt * pt * cc) / divisor;
+  peso *= racaData.fator * sexoData.fator;
 
   const pesoMin = Math.round(peso * 0.88);
   const pesoMax = Math.round(peso * 1.12);
-  peso = Math.round(peso);
 
-  // Sanity check
-  let aviso = '';
-  if (sexo === 'bezerro' && peso > 300) {
-    aviso = 'Peso alto para bezerro. Verifique as medidas.';
-  } else if (sexo !== 'bezerro' && peso < 100) {
-    aviso = 'Peso muito baixo para bovino adulto. Verifique as medidas e a referência de escala.';
-  } else if (peso > 1200) {
-    aviso = 'Peso acima de 1.200 kg. Verifique as medidas.';
-  }
-  if (perimetroTorax < 80 && sexo !== 'bezerro') {
-    aviso = 'Perímetro torácico muito baixo (' + perimetroTorax.toFixed(0) + ' cm). Verifique a marcação e o tamanho da referência.';
-  }
+  const usaGramas = peso < 1;
+  const pesoDisplay = usaGramas ? Math.round(peso * 1000) : (peso < 10 ? peso.toFixed(1) : Math.round(peso));
+  const unidade = usaGramas ? 'g' : 'kg';
+  const rangeDisplay = usaGramas
+    ? Math.round(pesoMin * 1000) + ' – ' + Math.round(pesoMax * 1000) + ' g'
+    : (peso < 10 ? (peso * 0.88).toFixed(1) + ' – ' + (peso * 1.12).toFixed(1) + ' kg' : pesoMin + ' – ' + pesoMax + ' kg');
 
-  document.getElementById('resultWeight').textContent = peso;
-  document.getElementById('resultRange').textContent = 'Faixa provável: ' + pesoMin + ' – ' + pesoMax + ' kg';
-  document.getElementById('resTorax').textContent = perimetroTorax.toFixed(0) + ' cm';
-  document.getElementById('resCorpo').textContent = compCorpo.toFixed(0) + ' cm';
+  peso = usaGramas ? peso : (peso < 10 ? parseFloat(peso.toFixed(1)) : Math.round(peso));
+
+  const aviso = c.sanity ? c.sanity(peso, sexo) : '';
+
+  document.getElementById('resultWeight').textContent = pesoDisplay;
+  document.getElementById('resultUnit').textContent = unidade;
+  document.getElementById('resultRange').textContent = 'Faixa provável: ' + rangeDisplay;
+  document.getElementById('resTorax').textContent = pt.toFixed(0) + ' cm';
+  document.getElementById('resToraxLbl').textContent = 'Perím. Torácico';
+  document.getElementById('resCorpo').textContent = cc.toFixed(0) + ' cm';
   document.getElementById('resultFormula').textContent =
-    'Fórmula: PT² × CC ÷ ' + divisor.toLocaleString('pt-BR') +
-    ' × ' + fatorRaca.toFixed(2) + ' (raça) × ' + fatorSexo.toFixed(2) + ' (sexo)';
+    c.getFormulaName(raca) + ' | PT² × CC ÷ ' + divisor.toLocaleString('pt-BR') +
+    ' × ' + racaData.fator.toFixed(2) + ' × ' + sexoData.fator.toFixed(2);
 
-  let detailsHtml =
-    '<strong>Modo:</strong> ' + (modo === 'manual' ? 'Fita métrica (medida direta)' : 'Estimativa por foto') + '<br>' +
-    '<strong>Raça:</strong> ' + (racaNames[raca] || raca) + '<br>' +
-    '<strong>Categoria:</strong> ' + (sexoNames[sexo] || sexo) + '<br>' +
-    (id ? '<strong>Identificação:</strong> ' + escapeHtml(id) + '<br>' : '');
+  let html = '<strong>Espécie:</strong> ' + c.emoji + ' ' + c.label + '<br>' +
+    '<strong>Modo:</strong> ' + (modo === 'manual' ? 'Fita métrica' : 'Foto') + '<br>' +
+    '<strong>Raça:</strong> ' + racaData.nome + '<br>' +
+    '<strong>Sexo:</strong> ' + sexoData.nome + '<br>' +
+    (id ? '<strong>ID:</strong> ' + escapeHtml(id) + '<br>' : '');
   if (modo === 'foto' && alturaTorax > 0) {
-    detailsHtml += '<strong>Altura tórax (foto):</strong> ' + alturaTorax.toFixed(1) + ' cm<br>';
-    detailsHtml += '<strong>Fator conversão:</strong> altura × 2.65 = PT estimado<br>';
-    detailsHtml += '<strong>Escala:</strong> ' + state.scale.toFixed(4) + ' cm/px<br>';
+    html += '<strong>Altura tórax:</strong> ' + alturaTorax.toFixed(1) + ' cm<br>';
+    html += '<strong>Fator conversão:</strong> × ' + c.toraxFactor + '<br>';
+    html += '<strong>Escala:</strong> ' + state.scale.toFixed(4) + ' cm/px<br>';
   }
-  detailsHtml +=
-    '<strong>Perím. torácico:</strong> ' + perimetroTorax.toFixed(1) + ' cm<br>' +
-    '<strong>Comprimento corporal:</strong> ' + compCorpo.toFixed(1) + ' cm<br>' +
-    '<strong>Fórmula:</strong> ' + (isZebu ? 'Quetelet (zebuínos)' : 'Schaeffer (taurinos)') + '<br>' +
+  html += '<strong>PT:</strong> ' + pt.toFixed(1) + ' cm<br>' +
+    '<strong>CC:</strong> ' + cc.toFixed(1) + ' cm<br>' +
     '<strong>Data:</strong> ' + new Date().toLocaleString('pt-BR');
-
-  if (aviso) {
-    detailsHtml += '<br><div class="warning-box" style="margin-top:8px;"><strong>Atenção:</strong> ' + aviso + '</div>';
-  }
-
-  document.getElementById('resultDetails').innerHTML = detailsHtml;
-
+  if (aviso) html += '<br><div class="warning-box" style="margin-top:8px;"><strong>Atenção:</strong> ' + aviso + '</div>';
+  document.getElementById('resultDetails').innerHTML = html;
   document.getElementById('resultArea').style.display = 'block';
   document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
 
   const record = {
-    id: Date.now(),
-    date: new Date().toISOString(),
-    peso,
-    pesoMin,
-    pesoMax,
-    perimetroTorax: Math.round(perimetroTorax),
-    compCorpo: Math.round(compCorpo),
-    raca: racaNames[raca] || raca,
-    sexo: sexoNames[sexo] || sexo,
-    animalId: id,
+    id: Date.now(), date: new Date().toISOString(),
+    especie: state.especie, especieEmoji: c.emoji,
+    peso: usaGramas ? peso * 1000 : peso, unidade,
+    pesoMin: usaGramas ? pesoMin * 1000 : pesoMin,
+    pesoMax: usaGramas ? pesoMax * 1000 : pesoMax,
+    perimetroTorax: Math.round(pt), compCorpo: Math.round(cc),
+    raca: racaData.nome, sexo: sexoData.nome, animalId: id,
     thumb: modo === 'foto' ? createThumbnail() : '',
-    formula: isZebu ? 'Quetelet' : 'Schaeffer',
-    modo: modo
+    formula: c.getFormulaName(raca), modo
   };
   state.history.unshift(record);
   if (state.history.length > 50) state.history.pop();
-  localStorage.setItem('pesovivo_history', JSON.stringify(state.history));
+  try { localStorage.setItem('pesovivo_history', JSON.stringify(state.history)); } catch(e) {}
 }
 
 function createThumbnail() {
   try {
     const canvas = document.createElement('canvas');
-    canvas.width = 80;
-    canvas.height = 80;
+    canvas.width = 80; canvas.height = 80;
     const ctx = canvas.getContext('2d');
     const img = document.getElementById('canvasImg');
     const s = Math.min(img.naturalWidth, img.naturalHeight);
-    const sx = (img.naturalWidth - s) / 2;
-    const sy = (img.naturalHeight - s) / 2;
-    ctx.drawImage(img, sx, sy, s, s, 0, 0, 80, 80);
+    ctx.drawImage(img, (img.naturalWidth - s) / 2, (img.naturalHeight - s) / 2, s, s, 0, 0, 80, 80);
     return canvas.toDataURL('image/jpeg', 0.5);
-  } catch (e) {
-    return '';
-  }
+  } catch(e) { return ''; }
 }
 
 function novaMedicao() {
@@ -1417,7 +1031,11 @@ function novaMedicao() {
   state.pixelDistances = { ref: 0, torax: 0, corpo: 0 };
   state.scale = 0;
   document.getElementById('animalId').value = '';
+  document.getElementById('manualPT').value = '';
+  document.getElementById('manualCC').value = '';
+  document.getElementById('manualAnimalId').value = '';
   document.getElementById('btnCalc').disabled = true;
+  document.getElementById('btnCalcManual').disabled = true;
   updateSteps();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -1425,77 +1043,58 @@ function novaMedicao() {
 function renderHistory() {
   const list = document.getElementById('historyList');
   if (state.history.length === 0) {
-    list.innerHTML = `<div class="history-empty">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/>
-      </svg>
-      <p>Nenhuma pesagem registrada</p>
-      <small>As pesagens aparecerão aqui</small>
-    </div>`;
+    list.innerHTML = '<div class="history-empty"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg><p>Nenhuma pesagem registrada</p></div>';
     return;
   }
-
   list.innerHTML = state.history.map(h => {
     const d = new Date(h.date);
-    const dateStr = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    return `<div class="history-item" onclick="viewHistoryDetail(${h.id})">
-      ${h.thumb ? '<img class="history-thumb" src="' + h.thumb + '" alt="">' : '<div class="history-thumb" style="display:flex;align-items:center;justify-content:center;font-size:24px;">🐄</div>'}
-      <div class="history-info">
-        <strong>${escapeHtml(h.animalId || h.raca)}</strong>
-        <small>${dateStr} · ${h.raca} · ${h.sexo}</small>
-      </div>
-      <div class="history-weight">${h.peso} kg</div>
-    </div>`;
+    const ds = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const emoji = h.especieEmoji || '🐄';
+    return '<div class="history-item" onclick="viewHistoryDetail(' + h.id + ')">' +
+      (h.thumb ? '<img class="history-thumb" src="' + h.thumb + '" alt="">' :
+        '<div class="history-thumb" style="display:flex;align-items:center;justify-content:center;font-size:24px;">' + emoji + '</div>') +
+      '<div class="history-info"><strong>' + escapeHtml(h.animalId || h.raca) + '</strong>' +
+      '<small>' + ds + ' · ' + h.raca + '</small></div>' +
+      '<div class="history-weight">' + h.peso + ' ' + (h.unidade || 'kg') + '</div></div>';
   }).join('');
-
-  list.innerHTML += `<div style="padding:12px;text-align:center;">
-    <button class="btn btn-outline btn-sm" onclick="clearHistory()" style="width:auto;color:var(--danger);border-color:var(--danger);">Limpar Histórico</button>
-  </div>`;
+  list.innerHTML += '<div style="padding:12px;text-align:center;"><button class="btn btn-outline btn-sm" onclick="clearHistory()" style="width:auto;color:var(--danger);border-color:var(--danger);">Limpar Histórico</button></div>';
 }
 
 function viewHistoryDetail(id) {
   const h = state.history.find(r => r.id === id);
   if (!h) return;
-
   showInstruction(
-    (h.animalId || h.raca) + ' — ' + h.peso + ' kg',
-    'Raça: ' + h.raca + '\n' +
-    'Categoria: ' + h.sexo + '\n' +
+    (h.animalId || h.raca) + ' — ' + h.peso + ' ' + (h.unidade || 'kg'),
+    (h.especieEmoji || '') + ' ' + (h.especie || 'bovino') + '\n' +
+    'Raça: ' + h.raca + '\nSexo: ' + h.sexo + '\n' +
     'PT: ' + h.perimetroTorax + ' cm | CC: ' + h.compCorpo + ' cm\n' +
-    'Faixa: ' + h.pesoMin + ' – ' + h.pesoMax + ' kg\n' +
-    'Fórmula: ' + h.formula + '\n' +
+    'Faixa: ' + h.pesoMin + ' – ' + h.pesoMax + ' ' + (h.unidade || 'kg') + '\n' +
+    'Fórmula: ' + h.formula + '\nModo: ' + (h.modo || 'foto') + '\n' +
     'Data: ' + new Date(h.date).toLocaleString('pt-BR')
   );
 }
 
 function clearHistory() {
-  if (confirm('Deseja limpar todo o histórico de pesagens?')) {
+  if (confirm('Deseja limpar todo o histórico?')) {
     state.history = [];
-    localStorage.setItem('pesovivo_history', JSON.stringify(state.history));
+    try { localStorage.setItem('pesovivo_history', JSON.stringify(state.history)); } catch(e) {}
     renderHistory();
     showToast('Histórico limpo');
   }
 }
 
 function compartilhar() {
+  const c = cfg();
   const peso = document.getElementById('resultWeight').textContent;
+  const unidade = document.getElementById('resultUnit').textContent;
   const range = document.getElementById('resultRange').textContent;
   const details = document.getElementById('resultDetails').innerText;
-
-  const text = '🐄 PesoVivo — Estimativa de Peso Bovino\n\n' +
-    '⚖️ Peso estimado: ' + peso + ' kg\n' +
-    '📊 ' + range + '\n\n' +
-    details + '\n\n' +
-    '📱 App PesoVivo — Pesagem por foto';
-
+  const text = c.emoji + ' PesoVivo — Estimativa de Peso\n\n' +
+    '⚖️ Peso estimado: ' + peso + ' ' + unidade + '\n📊 ' + range + '\n\n' + details + '\n\n📱 App PesoVivo';
   if (navigator.share) {
-    navigator.share({ title: 'PesoVivo — ' + peso + ' kg', text }).catch(() => {});
+    navigator.share({ title: 'PesoVivo — ' + peso + ' ' + unidade, text }).catch(() => {});
   } else {
-    navigator.clipboard.writeText(text).then(() => {
-      showToast('Resultado copiado!');
-    }).catch(() => {
-      showToast('Não foi possível copiar');
-    });
+    navigator.clipboard.writeText(text).then(() => showToast('Resultado copiado!')).catch(() => showToast('Não foi possível copiar'));
   }
 }
 
@@ -1505,22 +1104,14 @@ function showInstruction(title, text) {
   document.getElementById('instrText').style.whiteSpace = 'pre-line';
   document.getElementById('instructionOverlay').classList.add('active');
 }
+function closeInstruction() { document.getElementById('instructionOverlay').classList.remove('active'); }
 
-function closeInstruction() {
-  document.getElementById('instructionOverlay').classList.remove('active');
-}
-
-function escapeHtml(str) {
-  const d = document.createElement('div');
-  d.textContent = str;
-  return d.innerHTML;
-}
+function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
 
 document.getElementById('refSize').addEventListener('input', function() {
   if (state.pixelDistances.ref > 0) {
     state.scale = (parseFloat(this.value) || 100) / state.pixelDistances.ref;
-    updateSteps();
-    drawCanvas();
+    updateSteps(); drawCanvas();
   }
 });
 
@@ -1529,39 +1120,25 @@ window.addEventListener('resize', function() {
   if (cImg.src && cImg.clientWidth > 0) {
     const canvas = document.getElementById('measureCanvas');
     const oldW = state.displayWidth || cImg.clientWidth;
-    const newW = cImg.clientWidth;
-    const newH = cImg.clientHeight;
+    const newW = cImg.clientWidth, newH = cImg.clientHeight;
     const ratio = newW / oldW;
-
-    state.displayWidth = newW;
-    state.displayHeight = newH;
-    canvas.width = newW;
-    canvas.height = newH;
-    canvas.style.width = newW + 'px';
-    canvas.style.height = newH + 'px';
-
-    ['ref', 'torax', 'corpo'].forEach(tool => {
-      state.points[tool] = state.points[tool].map(p => ({
-        x: p.x * ratio,
-        y: p.y * ratio
-      }));
+    state.displayWidth = newW; state.displayHeight = newH;
+    canvas.width = newW; canvas.height = newH;
+    canvas.style.width = newW + 'px'; canvas.style.height = newH + 'px';
+    ['ref','torax','corpo'].forEach(tool => {
+      state.points[tool] = state.points[tool].map(p => ({ x: p.x * ratio, y: p.y * ratio }));
       if (state.points[tool].length === 2) {
         const pts = state.points[tool];
-        state.pixelDistances[tool] = Math.sqrt(
-          Math.pow(pts[1].x - pts[0].x, 2) + Math.pow(pts[1].y - pts[0].y, 2)
-        );
+        state.pixelDistances[tool] = Math.sqrt(Math.pow(pts[1].x - pts[0].x, 2) + Math.pow(pts[1].y - pts[0].y, 2));
       }
     });
-
-    if (state.pixelDistances.ref > 0) {
-      const refSize = parseFloat(document.getElementById('refSize').value) || 100;
-      state.scale = refSize / state.pixelDistances.ref;
-    }
-
-    drawCanvas();
-    updateSteps();
+    if (state.pixelDistances.ref > 0) state.scale = (parseFloat(document.getElementById('refSize').value) || 100) / state.pixelDistances.ref;
+    drawCanvas(); updateSteps();
   }
 });
+
+populateSelects();
+updateLabels();
 </script>
 </body>
 </html>
