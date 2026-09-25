@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>GestVet — Calculadora Gestacional Veterinária</title>
+<style>
+:root {
+  --primary: #6a1b9a;
+  --primary-light: #ab47bc;
+  --primary-dark: #4a148c;
+  --accent: #00897b;
+  --accent-light: #4db6ac;
+  --bg: #faf8fc;
+  --card: #ffffff;
+  --text: #212121;
+  --muted: #757575;
+  --border: #e0e0e0;
+  --danger: #c62828;
+  --danger-light: #ffcdd2;
+  --warning: #e65100;
+  --warning-light: #fff3e0;
+  --success: #2e7d32;
+  --success-light: #c8e6c9;
+  --info: #0277bd;
+  --info-light: #e1f5fe;
+  --shadow: 0 2px 8px rgba(0,0,0,.1);
+  --radius: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.5; overflow-x: hidden;
+}
+.header {
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+  color: white; padding: 16px 20px; display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.2); position: sticky; top: 0; z-index: 100;
+}
+.header h1 { font-size: 20px; font-weight: 700; }
+.header small { font-size: 11px; opacity: .8; display: block; margin-top: 2px; }
+.tabs {
+  display: flex; background: var(--card); border-bottom: 1px solid var(--border);
+  position: sticky; top: 60px; z-index: 99;
+}
+.tab {
+  flex: 1; padding: 12px 6px; text-align: center; font-size: 12px; font-weight: 600;
+  color: var(--muted); border: none; background: none; cursor: pointer;
+  border-bottom: 3px solid transparent; transition: all .2s;
+}
+.tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+.tab svg { display: block; margin: 0 auto 3px; }
+.screen { display: none; padding: 16px; padding-bottom: 80px; }
+.screen.active { display: block; }
+.card {
+  background: var(--card); border-radius: var(--radius); padding: 16px;
+  margin-bottom: 12px; box-shadow: var(--shadow);
+}
+.card h3 {
+  font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.species-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 8px 0; }
+.species-item {
+  background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius);
+  padding: 12px 6px; text-align: center; cursor: pointer; transition: all .2s;
+  font-size: 12px; font-weight: 600;
+}
+.species-item:hover { border-color: var(--primary-light); }
+.species-item.selected { border-color: var(--primary); background: rgba(106,27,154,.06); }
+.species-item .icon { font-size: 28px; display: block; margin-bottom: 4px; }
+.form-group { margin-bottom: 12px; }
+.form-group label {
+  display: block; font-size: 12px; font-weight: 600; color: var(--muted);
+  margin-bottom: 4px; text-transform: uppercase; letter-spacing: .5px;
+}
+.form-group input, .form-group select {
+  width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px;
+  font-size: 14px; background: var(--bg); color: var(--text); transition: border-color .2s;
+}
+.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary-light); }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 600;
+  border: none; cursor: pointer; transition: all .2s; width: 100%;
+}
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-primary:disabled { background: #ce93d8; cursor: not-allowed; }
+.btn-accent { background: var(--accent); color: white; }
+.btn-accent:hover { background: #00695c; }
+.btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+.btn-sm { padding: 8px 14px; font-size: 12px; width: auto; }
+.btn-row { display: flex; gap: 8px; margin-top: 12px; }
+.btn-row .btn { flex: 1; }
+.mode-toggle { display: flex; border: 2px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 12px; }
+.mode-btn {
+  flex: 1; padding: 10px; text-align: center; font-size: 13px; font-weight: 600;
+  border: none; background: var(--bg); cursor: pointer; color: var(--muted); transition: all .2s;
+}
+.mode-btn.active { background: var(--primary); color: white; }
+
+.result-box {
+  border-radius: var(--radius); padding: 20px; text-align: center; margin: 12px 0;
+  color: white;
+}
+.result-box.normal { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); }
+.result-box.warning { background: linear-gradient(135deg, #bf360c, var(--warning)); }
+.result-box.danger { background: linear-gradient(135deg, #b71c1c, var(--danger)); }
+.result-box.success { background: linear-gradient(135deg, #1b5e20, var(--success)); }
+.result-big { font-size: 36px; font-weight: 800; line-height: 1; }
+.result-label { font-size: 12px; opacity: .8; margin-bottom: 4px; }
+.result-sub { font-size: 14px; opacity: .85; margin-top: 6px; }
+
+.progress-bar-container { margin: 16px 0; }
+.progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.progress-bar { height: 20px; background: #e0e0e0; border-radius: 10px; overflow: hidden; position: relative; }
+.progress-fill { height: 100%; border-radius: 10px; transition: width .5s ease; }
+.progress-text { position: absolute; top: 0; left: 0; right: 0; text-align: center; font-size: 11px; font-weight: 700; color: white; line-height: 20px; }
+
+.timeline { position: relative; padding-left: 24px; margin: 12px 0; }
+.timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+.tl-item { position: relative; padding: 8px 0 8px 16px; font-size: 12px; }
+.tl-item::before {
+  content: ''; position: absolute; left: -20px; top: 12px;
+  width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--primary-light);
+  background: white;
+}
+.tl-item.past::before { background: var(--primary); border-color: var(--primary); }
+.tl-item.current::before { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 4px rgba(0,137,123,.2); }
+.tl-item.future::before { background: #e0e0e0; border-color: #bdbdbd; }
+.tl-item strong { display: block; color: var(--text); }
+.tl-item small { color: var(--muted); }
+.tl-item.current strong { color: var(--accent); }
+
+.alert-box {
+  border-radius: var(--radius); padding: 14px; margin: 10px 0; font-size: 13px; line-height: 1.6;
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.alert-box .alert-icon { font-size: 20px; flex-shrink: 0; }
+.alert-danger { background: var(--danger-light); border-left: 4px solid var(--danger); color: #b71c1c; }
+.alert-warning { background: var(--warning-light); border-left: 4px solid var(--warning); color: #e65100; }
+.alert-success { background: var(--success-light); border-left: 4px solid var(--success); color: #1b5e20; }
+.alert-info { background: var(--info-light); border-left: 4px solid var(--info); color: #01579b; }
+
+.fc-zones { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin: 8px 0; text-align: center; }
+.fc-zone { border-radius: 8px; padding: 10px 6px; font-size: 11px; font-weight: 600; }
+.fc-zone .val { font-size: 18px; font-weight: 800; display: block; }
+.fc-brad { background: var(--danger-light); color: var(--danger); }
+.fc-norm { background: var(--success-light); color: var(--success); }
+.fc-tach { background: var(--warning-light); color: var(--warning); }
+
+.info-box {
+  background: var(--info-light); border-left: 4px solid var(--info); border-radius: 0 8px 8px 0;
+  padding: 12px; margin: 8px 0; font-size: 12px; color: #01579b; line-height: 1.6;
+}
+
+.history-item {
+  display: flex; align-items: center; gap: 12px; padding: 12px;
+  border-bottom: 1px solid var(--border); cursor: pointer; transition: background .15s;
+}
+.history-item:hover { background: var(--bg); }
+.history-icon { font-size: 32px; width: 48px; text-align: center; flex-shrink: 0; }
+.history-info { flex: 1; min-width: 0; }
+.history-info strong { display: block; font-size: 14px; }
+.history-info small { color: var(--muted); font-size: 12px; }
+.history-val { font-size: 16px; font-weight: 700; color: var(--primary); white-space: nowrap; }
+
+.guide-section { font-size: 12px; line-height: 1.8; color: var(--muted); }
+.guide-section strong { color: var(--text); }
+.guide-table { width: 100%; border-collapse: collapse; font-size: 11px; margin: 8px 0; }
+.guide-table th, .guide-table td { padding: 6px 8px; border: 1px solid var(--border); text-align: center; }
+.guide-table th { background: var(--primary); color: white; font-weight: 600; }
+.guide-table tr:nth-child(even) { background: var(--bg); }
+
+.toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(100px);
+  background: #333; color: white; padding: 12px 24px; border-radius: 8px; font-size: 13px;
+  z-index: 300; transition: transform .3s ease; white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+@media (min-width: 600px) { .screen { max-width: 520px; margin: 0 auto; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+    <rect width="36" height="36" rx="8" fill="rgba(255,255,255,.15)"/>
+    <circle cx="18" cy="16" r="8" stroke="white" stroke-width="2" fill="none"/>
+    <path d="M14 14 C14 14 16 19 18 19 C20 19 22 14 22 14" stroke="white" stroke-width="1.5" fill="none"/>
+    <path d="M15 16 Q18 12 21 16" stroke="white" stroke-width="1.5" fill="none"/>
+    <line x1="18" y1="24" x2="18" y2="30" stroke="white" stroke-width="1.5"/>
+    <line x1="14" y1="28" x2="22" y2="28" stroke="white" stroke-width="1.5"/>
+  </svg>
+  <div>
+    <h1>GestVet</h1>
+    <small>Calculadora Gestacional Veterinária</small>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showScreen('calc')" id="tab-calc">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
+    Calcular
+  </button>
+  <button class="tab" onclick="showScreen('fc')" id="tab-fc">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
+    FC Fetal
+  </button>
+  <button class="tab" onclick="showScreen('hist')" id="tab-hist">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+    Histórico
+  </button>
+  <button class="tab" onclick="showScreen('guia')" id="tab-guia">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v.01M12 8a2 2 0 011.7 3.04L12 13"/></svg>
+    Guia
+  </button>
+</div>
+
+<!-- CALCULAR -->
+<div class="screen active" id="screen-calc">
+  <div class="card">
+    <h3>🐾 Espécie</h3>
+    <div class="species-grid">
+      <div class="species-item selected" data-sp="cao" onclick="setSp('cao')"><span class="icon">🐕</span>Cão</div>
+      <div class="species-item" data-sp="gato" onclick="setSp('gato')"><span class="icon">🐈</span>Gato</div>
+      <div class="species-item" data-sp="bovino" onclick="setSp('bovino')"><span class="icon">🐄</span>Bovino</div>
+      <div class="species-item" data-sp="equino" onclick="setSp('equino')"><span class="icon">🐴</span>Equino</div>
+      <div class="species-item" data-sp="caprino" onclick="setSp('caprino')"><span class="icon">🐐</span>Caprino</div>
+      <div class="species-item" data-sp="ovino" onclick="setSp('ovino')"><span class="icon">🐑</span>Ovino</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📅 Modo de Cálculo</h3>
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="mode-data" onclick="setMode('data')">Por Data da Cobertura</button>
+      <button class="mode-btn" id="mode-bio" onclick="setMode('bio')">Por Biometria Fetal</button>
+    </div>
+
+    <!-- POR DATA -->
+    <div id="panel-data">
+      <div class="form-group">
+        <label>Data da cobertura / inseminação</label>
+        <input type="date" id="dataCobertura" onchange="checkCalc()">
+      </div>
+      <div class="form-group">
+        <label>Raça (opcional)</label>
+        <select id="racaSelect"></select>
+      </div>
+      <div class="form-group">
+        <label>Identificação (opcional)</label>
+        <input type="text" id="animalId" placeholder="Ex: Estrela, Brinco 042...">
+      </div>
+      <div class="form-group">
+        <label id="lblNFilhotes">Nº de filhotes (se conhecido)</label>
+        <input type="number" id="nFilhotes" placeholder="Deixe vazio se não souber" min="1" max="20">
+      </div>
+    </div>
+
+    <!-- POR BIOMETRIA -->
+    <div id="panel-bio" style="display:none">
+      <div class="info-box" id="bioInfo">
+        Insira a medida obtida no ultrassom para estimar a idade gestacional.
+      </div>
+      <div class="form-group">
+        <label>Tipo de medida</label>
+        <select id="bioTipo" onchange="updateBioFields()"></select>
+      </div>
+      <div class="form-group">
+        <label id="lblBioMedida">Medida (mm)</label>
+        <input type="number" id="bioMedida" placeholder="Ex: 25" step="0.1" min="0" onchange="checkCalc()">
+      </div>
+      <div class="form-group">
+        <label>Data do exame</label>
+        <input type="date" id="dataExame" onchange="checkCalc()">
+      </div>
+      <div class="form-group">
+        <label>Identificação (opcional)</label>
+        <input type="text" id="bioAnimalId" placeholder="Ex: Estrela, Brinco 042...">
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="btnCalc" onclick="calcular()" disabled>Calcular</button>
+  </div>
+
+  <div id="resultArea" style="display:none"></div>
+</div>
+
+<!-- FC FETAL -->
+<div class="screen" id="screen-fc">
+  <div class="card">
+    <h3>❤️ Frequência Cardíaca Fetal</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">
+      Insira a FC fetal aferida no ultrassom para avaliar o bem-estar fetal.
+    </p>
+    <div class="form-group">
+      <label>Espécie</label>
+      <select id="fcEspecie" onchange="updateFcZones()">
+        <option value="cao">🐕 Cão</option>
+        <option value="gato">🐈 Gato</option>
+        <option value="bovino">🐄 Bovino</option>
+        <option value="equino">🐴 Equino</option>
+        <option value="caprino">🐐 Caprino</option>
+        <option value="ovino">🐑 Ovino</option>
+      </select>
+    </div>
+    <div id="fcZonesRef"></div>
+    <div class="form-group">
+      <label>FC fetal aferida (bpm)</label>
+      <input type="number" id="fcValor" placeholder="Ex: 200" min="20" max="400">
+    </div>
+    <div class="form-group">
+      <label>Idade gestacional aproximada (dias)</label>
+      <input type="number" id="fcIdade" placeholder="Ex: 45" min="1" max="400">
+    </div>
+    <button class="btn btn-accent" onclick="avaliarFC()">Avaliar</button>
+  </div>
+  <div id="fcResult" style="display:none"></div>
+</div>
+
+<!-- HISTÓRICO -->
+<div class="screen" id="screen-hist">
+  <div class="card">
+    <h3>📋 Histórico</h3>
+    <div id="histList">
+      <div style="text-align:center;padding:40px;color:var(--muted);">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+        <p style="margin-top:8px;">Nenhum cálculo registrado</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GUIA -->
+<div class="screen" id="screen-guia">
+  <div class="card">
+    <h3>📖 Como Funciona</h3>
+    <div class="guide-section">
+      <p>O <strong>GestVet</strong> calcula a idade gestacional e a data provável do parto (DPP) para 6 espécies. Também avalia o bem-estar fetal pela frequência cardíaca.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📊 Períodos Gestacionais</h3>
+    <table class="guide-table">
+      <tr><th>Espécie</th><th>Mín</th><th>Média</th><th>Máx</th></tr>
+      <tr><td>🐕 Cão</td><td>58</td><td>63</td><td>68</td></tr>
+      <tr><td>🐈 Gato</td><td>58</td><td>65</td><td>67</td></tr>
+      <tr><td>🐄 Bovino</td><td>270</td><td>283</td><td>295</td></tr>
+      <tr><td>🐴 Equino</td><td>320</td><td>340</td><td>365</td></tr>
+      <tr><td>🐐 Caprino</td><td>145</td><td>150</td><td>155</td></tr>
+      <tr><td>🐑 Ovino</td><td>142</td><td>147</td><td>152</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>❤️ FC Fetal — Referência</h3>
+    <table class="guide-table">
+      <tr><th>Espécie</th><th>Bradicardia</th><th>Normal</th><th>Taquicardia</th></tr>
+      <tr><td>🐕 Cão</td><td>&lt;170</td><td>170–220</td><td>&gt;220</td></tr>
+      <tr><td>🐈 Gato</td><td>&lt;160</td><td>160–240</td><td>&gt;240</td></tr>
+      <tr><td>🐄 Bovino</td><td>&lt;100</td><td>100–160</td><td>&gt;160</td></tr>
+      <tr><td>🐴 Equino</td><td>&lt;60</td><td>60–120</td><td>&gt;120</td></tr>
+      <tr><td>🐐 Caprino</td><td>&lt;120</td><td>120–180</td><td>&gt;180</td></tr>
+      <tr><td>🐑 Ovino</td><td>&lt;120</td><td>120–180</td><td>&gt;180</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>🔬 Biometria Fetal</h3>
+    <div class="guide-section">
+      <p><strong>Cães:</strong> DSG (diâmetro do saco gestacional), CRL (comprimento crânio-caudal) e DBP (diâmetro biparietal).</p>
+      <p style="margin-top:6px;"><strong>Gatos:</strong> DSG e CRL.</p>
+      <p style="margin-top:6px;"><strong>Bovinos / Equinos:</strong> CRL (crown-rump length), diâmetro do tronco fetal.</p>
+      <p style="margin-top:6px;"><strong>Caprinos / Ovinos:</strong> CRL e DBP.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>⚠️ Sinais de Sofrimento Fetal</h3>
+    <div class="guide-section">
+      <ul style="padding-left:16px;">
+        <li><strong>Bradicardia persistente</strong> — sinal mais importante de sofrimento fetal agudo</li>
+        <li><strong>Ausência de movimentação fetal</strong> — especialmente no terço final</li>
+        <li><strong>Redução do líquido amniótico</strong> (oligoidrâmnio)</li>
+        <li><strong>Desaceleração tardia</strong> — queda da FC após contração</li>
+        <li><strong>Alteração no fluxo sanguíneo</strong> — avaliação Doppler</li>
+        <li><strong>Taquicardia sustentada</strong> — pode indicar hipóxia compensada</li>
+      </ul>
+      <div class="alert-box alert-danger" style="margin-top:12px;">
+        <span class="alert-icon">🚨</span>
+        <div>
+          <strong>Bradicardia persistente (&lt;170 bpm em cães, &lt;160 em gatos) indica necessidade de intervenção imediata.</strong>
+          Especialmente se &lt;150 bpm em cadelas — considerar cesariana de emergência.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>⚠️ Limitações</h3>
+    <div class="guide-section">
+      <ul style="padding-left:16px;">
+        <li>As datas são estimativas — variação individual é normal</li>
+        <li>Raça, número de filhotes e nutrição afetam a duração</li>
+        <li>Biometria fetal é mais precisa no início da gestação</li>
+        <li>FC fetal isolada não substitui avaliação clínica completa</li>
+        <li>Em casos de sofrimento fetal, procure assistência veterinária urgente</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SP = {
+  cao: {
+    emoji: '🐕', label: 'Cão', gestMin: 58, gestMedia: 63, gestMax: 68,
+    fcMin: 170, fcMax: 220, fcCritico: 150,
+    racas: ['SRD','Labrador','Golden Retriever','Pastor Alemão','Bulldog','Poodle','Rottweiler','Beagle','Yorkshire','Shih Tzu','Pit Bull','Husky Siberiano','Border Collie','Dachshund','Boxer','Outra'],
+    racaFator: { 'Bulldog': -2, 'Dachshund': -1, 'Pastor Alemão': 1, 'Labrador': 1, 'Golden Retriever': 1 },
+    filhotesLabel: 'Nº de filhotes (se conhecido)',
+    showFilhotes: true,
+    bioTipos: [
+      { id: 'dsg', label: 'DSG — Diâmetro do Saco Gestacional (mm)', formula: function(v){ return (v + 27.7) / 1.54; }, range: '10-35mm', fase: '20-35 dias' },
+      { id: 'crl', label: 'CRL — Comprimento Crânio-Caudal (mm)', formula: function(v){ return (v + 33.1) / 1.80; }, range: '5-80mm', fase: '25-50 dias' },
+      { id: 'dbp', label: 'DBP — Diâmetro Biparietal (mm)', formula: function(v){ return (v + 29.0) / 1.20; }, range: '8-30mm', fase: '35-60 dias' }
+    ],
+    marcos: [
+      { dia: 1, texto: 'Cobertura / Inseminação' },
+      { dia: 16, texto: 'Implantação dos embriões' },
+      { dia: 21, texto: 'Diagnóstico de gestação possível (US)' },
+      { dia: 25, texto: 'Batimento cardíaco fetal detectável' },
+      { dia: 30, texto: 'Organogênese — evitar fármacos' },
+      { dia: 35, texto: 'Calcificação óssea iniciando' },
+      { dia: 42, texto: 'Raio-X: esqueleto fetal visível' },
+      { dia: 45, texto: 'Início do terço final' },
+      { dia: 55, texto: 'Desenvolvimento pulmonar ativo' },
+      { dia: 58, texto: 'Parto possível (prematuro)' },
+      { dia: 63, texto: 'Data provável do parto (DPP)' }
+    ]
+  },
+  gato: {
+    emoji: '🐈', label: 'Gato', gestMin: 58, gestMedia: 65, gestMax: 67,
+    fcMin: 160, fcMax: 240, fcCritico: 140,
+    racas: ['SRD','Persa','Siamês','Maine Coon','Ragdoll','British Shorthair','Bengal','Angorá','Scottish Fold','Sphynx','Outra'],
+    racaFator: { 'Siamês': 1, 'Persa': -1 },
+    filhotesLabel: 'Nº de filhotes (se conhecido)',
+    showFilhotes: true,
+    bioTipos: [
+      { id: 'dsg', label: 'DSG — Diâmetro do Saco Gestacional (mm)', formula: function(v){ return (v + 25) / 1.4; }, range: '8-30mm', fase: '18-30 dias' },
+      { id: 'crl', label: 'CRL — Comprimento Crânio-Caudal (mm)', formula: function(v){ return (v + 30) / 1.6; }, range: '5-70mm', fase: '22-45 dias' }
+    ],
+    marcos: [
+      { dia: 1, texto: 'Cobertura' },
+      { dia: 15, texto: 'Implantação embrionária' },
+      { dia: 18, texto: 'Diagnóstico de gestação possível (US)' },
+      { dia: 22, texto: 'Batimento cardíaco fetal detectável' },
+      { dia: 28, texto: 'Palpação abdominal possível' },
+      { dia: 35, texto: 'Calcificação óssea' },
+      { dia: 42, texto: 'Raio-X: esqueleto visível' },
+      { dia: 55, texto: 'Desenvolvimento pulmonar ativo' },
+      { dia: 58, texto: 'Parto possível' },
+      { dia: 65, texto: 'Data provável do parto (DPP)' }
+    ]
+  },
+  bovino: {
+    emoji: '🐄', label: 'Bovino', gestMin: 270, gestMedia: 283, gestMax: 295,
+    fcMin: 100, fcMax: 160, fcCritico: 80,
+    racas: ['Nelore','Angus','Brahman','Girolando','Hereford','Tabapuã','Guzerá','Sindi','Mestiço','Outra'],
+    racaFator: { 'Nelore': 2, 'Brahman': 3, 'Angus': -3, 'Hereford': -2 },
+    filhotesLabel: 'Gestação gemelar?',
+    showFilhotes: false,
+    bioTipos: [
+      { id: 'crl', label: 'CRL — Comprimento Crânio-Caudal (mm)', formula: function(v){ return 8.4 + 0.087 * v + 0.000052 * v * v; }, range: '5-120mm', fase: '30-90 dias' },
+      { id: 'dtf', label: 'Diâmetro do Tronco Fetal (mm)', formula: function(v){ return 50 + v * 1.2; }, range: '20-80mm', fase: '60-150 dias' }
+    ],
+    marcos: [
+      { dia: 1, texto: 'Cobertura / IATF' },
+      { dia: 18, texto: 'Reconhecimento materno da gestação' },
+      { dia: 28, texto: 'Diagnóstico de gestação (US transretal)' },
+      { dia: 35, texto: 'Batimento cardíaco detectável' },
+      { dia: 42, texto: 'Sexagem fetal possível (US)' },
+      { dia: 60, texto: 'Membros e órbitas visíveis' },
+      { dia: 90, texto: 'Fim do período embrionário' },
+      { dia: 120, texto: 'Palpação retal — frêmito da a. uterina' },
+      { dia: 150, texto: 'Meio da gestação' },
+      { dia: 210, texto: 'Início do terço final — atenção nutricional' },
+      { dia: 240, texto: 'Preparar para pré-parto' },
+      { dia: 270, texto: 'Parto possível' },
+      { dia: 283, texto: 'Data provável do parto (DPP)' }
+    ]
+  },
+  equino: {
+    emoji: '🐴', label: 'Equino', gestMin: 320, gestMedia: 340, gestMax: 365,
+    fcMin: 60, fcMax: 120, fcCritico: 50,
+    racas: ['Quarto de Milha','Mangalarga Marchador','Crioulo','Puro Sangue Inglês','Árabe','Paint Horse','Appaloosa','Campolina','Outra'],
+    racaFator: { 'Puro Sangue Inglês': -5, 'Mangalarga Marchador': 3, 'Crioulo': 2 },
+    filhotesLabel: 'Gestação gemelar?',
+    showFilhotes: false,
+    bioTipos: [
+      { id: 'crl', label: 'CRL — Comprimento Crânio-Caudal (mm)', formula: function(v){ return 17.1 + 0.064 * v + 0.00004 * v * v; }, range: '5-100mm', fase: '20-70 dias' },
+      { id: 'dov', label: 'Diâmetro da Vesícula Embrionária (mm)', formula: function(v){ return 10 + v * 0.75; }, range: '5-35mm', fase: '14-30 dias' }
+    ],
+    marcos: [
+      { dia: 1, texto: 'Cobertura / Inseminação' },
+      { dia: 14, texto: 'Diagnóstico precoce de gestação (US)' },
+      { dia: 16, texto: 'Vesícula embrionária fixa' },
+      { dia: 21, texto: 'Embrião visível (US)' },
+      { dia: 25, texto: 'Batimento cardíaco detectável' },
+      { dia: 40, texto: 'Sexagem fetal possível' },
+      { dia: 60, texto: 'Início da organogênese avançada' },
+      { dia: 90, texto: 'Fim do período embrionário' },
+      { dia: 120, texto: 'Palpação retal — diagnóstico tardio' },
+      { dia: 150, texto: 'Movimentos fetais possíveis' },
+      { dia: 240, texto: 'Início do terço final' },
+      { dia: 300, texto: 'Maturação pulmonar fetal' },
+      { dia: 315, texto: 'Preparar maternidade / piquete' },
+      { dia: 320, texto: 'Parto possível' },
+      { dia: 340, texto: 'Data provável do parto (DPP)' }
+    ]
+  },
+  caprino: {
+    emoji: '🐐', label: 'Caprino', gestMin: 145, gestMedia: 150, gestMax: 155,
+    fcMin: 120, fcMax: 180, fcCritico: 100,
+    racas: ['Boer','Saanen','Anglo-Nubiana','Alpina','Toggenburg','Moxotó','SRD','Outra'],
+    racaFator: { 'Boer': 1, 'Saanen': -1 },
+    filhotesLabel: 'Nº de filhotes (se conhecido)',
+    showFilhotes: true,
+    bioTipos: [
+      { id: 'crl', label: 'CRL — Comprimento Crânio-Caudal (mm)', formula: function(v){ return 20 + v * 0.55; }, range: '10-80mm', fase: '25-70 dias' },
+      { id: 'dbp', label: 'DBP — Diâmetro Biparietal (mm)', formula: function(v){ return 30 + v * 2.0; }, range: '10-50mm', fase: '40-100 dias' }
+    ],
+    marcos: [
+      { dia: 1, texto: 'Cobertura / Monta' },
+      { dia: 17, texto: 'Se não retornar ao cio — possível gestação' },
+      { dia: 25, texto: 'Diagnóstico de gestação (US transabdominal)' },
+      { dia: 30, texto: 'Batimento cardíaco fetal detectável' },
+      { dia: 45, texto: 'Sexagem fetal possível' },
+      { dia: 60, texto: 'Calcificação óssea' },
+      { dia: 75, texto: 'Meio da gestação' },
+      { dia: 100, texto: 'Início do terço final' },
+      { dia: 120, texto: 'Crescimento fetal acelerado' },
+      { dia: 140, texto: 'Preparar para parto' },
+      { dia: 145, texto: 'Parto possível' },
+      { dia: 150, texto: 'Data provável do parto (DPP)' }
+    ]
+  },
+  ovino: {
+    emoji: '🐑', label: 'Ovino', gestMin: 142, gestMedia: 147, gestMax: 152,
+    fcMin: 120, fcMax: 180, fcCritico: 100,
+    racas: ['Santa Inês','Dorper','Suffolk','Morada Nova','Texel','Hampshire','Bergamácia','SRD','Outra'],
+    racaFator: { 'Dorper': -1, 'Suffolk': 1 },
+    filhotesLabel: 'Nº de filhotes (se conhecido)',
+    showFilhotes: true,
+    bioTipos: [
+      { id: 'crl', label: 'CRL — Comprimento Crânio-Caudal (mm)', formula: function(v){ return 19 + v * 0.53; }, range: '10-80mm', fase: '25-70 dias' },
+      { id: 'dbp', label: 'DBP — Diâmetro Biparietal (mm)', formula: function(v){ return 28 + v * 2.1; }, range: '10-50mm', fase: '40-100 dias' }
+    ],
+    marcos: [
+      { dia: 1, texto: 'Cobertura / Monta' },
+      { dia: 17, texto: 'Se não retornar ao cio — possível gestação' },
+      { dia: 25, texto: 'Diagnóstico de gestação (US)' },
+      { dia: 30, texto: 'Batimento cardíaco detectável' },
+      { dia: 45, texto: 'Sexagem fetal possível' },
+      { dia: 60, texto: 'Calcificação óssea' },
+      { dia: 75, texto: 'Meio da gestação' },
+      { dia: 100, texto: 'Início do terço final' },
+      { dia: 130, texto: 'Preparar para parto — atenção à toxemia' },
+      { dia: 142, texto: 'Parto possível' },
+      { dia: 147, texto: 'Data provável do parto (DPP)' }
+    ]
+  }
+};
+
+let currentSp = 'cao';
+let currentMode = 'data';
+let history = [];
+try { history = JSON.parse(localStorage.getItem('gestvet_history') || '[]'); } catch(e) { history = []; }
+
+function sp() { return SP[currentSp]; }
+
+function setSp(s) {
+  currentSp = s;
+  document.querySelectorAll('.species-item').forEach(el => el.classList.toggle('selected', el.dataset.sp === s));
+  populateRacas();
+  populateBio();
+  const c = sp();
+  document.getElementById('lblNFilhotes').textContent = c.filhotesLabel;
+  document.getElementById('nFilhotes').style.display = c.showFilhotes ? '' : 'none';
+  document.getElementById('lblNFilhotes').style.display = c.showFilhotes ? '' : 'none';
+  document.getElementById('resultArea').style.display = 'none';
+  checkCalc();
+}
+
+function setMode(m) {
+  currentMode = m;
+  document.getElementById('mode-data').classList.toggle('active', m === 'data');
+  document.getElementById('mode-bio').classList.toggle('active', m === 'bio');
+  document.getElementById('panel-data').style.display = m === 'data' ? '' : 'none';
+  document.getElementById('panel-bio').style.display = m === 'bio' ? '' : 'none';
+  document.getElementById('resultArea').style.display = 'none';
+  checkCalc();
+}
+
+function populateRacas() {
+  const sel = document.getElementById('racaSelect');
+  sel.innerHTML = sp().racas.map(r => '<option value="' + r + '">' + r + '</option>').join('');
+}
+
+function populateBio() {
+  const sel = document.getElementById('bioTipo');
+  sel.innerHTML = sp().bioTipos.map(b => '<option value="' + b.id + '">' + b.label + '</option>').join('');
+  updateBioFields();
+}
+
+function updateBioFields() {
+  const c = sp();
+  const tipo = document.getElementById('bioTipo').value;
+  const bio = c.bioTipos.find(b => b.id === tipo);
+  if (bio) {
+    document.getElementById('lblBioMedida').textContent = 'Medida em mm (' + bio.range + ', ' + bio.fase + ')';
+  }
+}
+
+function checkCalc() {
+  let ok = false;
+  if (currentMode === 'data') {
+    ok = !!document.getElementById('dataCobertura').value;
+  } else {
+    ok = !!document.getElementById('bioMedida').value && !!document.getElementById('dataExame').value;
+  }
+  document.getElementById('btnCalc').disabled = !ok;
+}
+
+function calcular() {
+  const c = sp();
+  let idadeGest, dataCobertura, dpp, animalId, raca, modo;
+  const hoje = new Date();
+  hoje.setHours(0,0,0,0);
+
+  if (currentMode === 'data') {
+    modo = 'data';
+    dataCobertura = new Date(document.getElementById('dataCobertura').value + 'T00:00:00');
+    animalId = document.getElementById('animalId').value;
+    raca = document.getElementById('racaSelect').value;
+    const nFilhotes = parseInt(document.getElementById('nFilhotes').value) || 0;
+
+    let gestDias = c.gestMedia;
+    const rf = c.racaFator[raca] || 0;
+    gestDias += rf;
+    if (c.showFilhotes && nFilhotes > 1) {
+      gestDias -= Math.min((nFilhotes - 1) * 1, 5);
+    }
+
+    dpp = new Date(dataCobertura);
+    dpp.setDate(dpp.getDate() + gestDias);
+
+    const diff = Math.floor((hoje - dataCobertura) / 86400000);
+    idadeGest = Math.max(0, diff);
+  } else {
+    modo = 'biometria';
+    const medida = parseFloat(document.getElementById('bioMedida').value);
+    const dataExame = new Date(document.getElementById('dataExame').value + 'T00:00:00');
+    animalId = document.getElementById('bioAnimalId').value;
+    raca = '';
+
+    const tipo = document.getElementById('bioTipo').value;
+    const bio = c.bioTipos.find(b => b.id === tipo);
+    if (!bio) return;
+
+    const idadeNaExame = Math.round(bio.formula(medida));
+    const diffExame = Math.floor((hoje - dataExame) / 86400000);
+    idadeGest = idadeNaExame + diffExame;
+
+    dataCobertura = new Date(dataExame);
+    dataCobertura.setDate(dataCobertura.getDate() - idadeNaExame);
+    dpp = new Date(dataCobertura);
+    dpp.setDate(dpp.getDate() + c.gestMedia);
+  }
+
+  const diasRestantes = Math.max(0, Math.floor((dpp - hoje) / 86400000));
+  const percentual = Math.min(100, Math.round((idadeGest / c.gestMedia) * 100));
+
+  const semanas = Math.floor(idadeGest / 7);
+  const diasResto = idadeGest % 7;
+
+  let trimestre = '';
+  const tercoUm = Math.round(c.gestMedia / 3);
+  const tercoDois = Math.round(c.gestMedia * 2 / 3);
+  if (idadeGest <= tercoUm) trimestre = 'Primeiro terço';
+  else if (idadeGest <= tercoDois) trimestre = 'Segundo terço';
+  else trimestre = 'Terço final';
+
+  const dppMin = new Date(dataCobertura); dppMin.setDate(dppMin.getDate() + c.gestMin);
+  const dppMax = new Date(dataCobertura); dppMax.setDate(dppMax.getDate() + c.gestMax);
+
+  let alertas = [];
+  if (idadeGest > c.gestMax) {
+    alertas.push({ tipo: 'danger', icon: '🚨', texto: '<strong>Gestação prolongada!</strong> Ultrapassou o limite máximo de ' + c.gestMax + ' dias. Avaliação veterinária urgente — risco de sofrimento fetal e distocia.' });
+  } else if (idadeGest > c.gestMedia + 5) {
+    alertas.push({ tipo: 'warning', icon: '⚠️', texto: '<strong>Atenção:</strong> Gestação acima da média. Monitorar sinais de parto e bem-estar fetal.' });
+  }
+  if (idadeGest >= tercoDois) {
+    alertas.push({ tipo: 'info', icon: '📋', texto: '<strong>Terço final:</strong> Intensificar monitoramento. Avaliar FC fetal, movimentação e líquido amniótico. Preparar para o parto.' });
+  }
+  if (currentSp === 'equino' && idadeGest > 360) {
+    alertas.push({ tipo: 'danger', icon: '🏥', texto: '<strong>Égua com gestação >360 dias.</strong> Avaliar indução ou monitoramento intensivo. Risco de distocia e placentite.' });
+  }
+  if ((currentSp === 'ovino' || currentSp === 'caprino') && idadeGest > c.gestMedia * 0.85) {
+    alertas.push({ tipo: 'warning', icon: '🩺', texto: '<strong>Atenção:</strong> Período de risco de toxemia da gestação em ' + c.label.toLowerCase() + 's. Monitorar escore corporal e alimentação.' });
+  }
+
+  let progressColor = 'var(--primary)';
+  if (percentual > 95) progressColor = 'var(--danger)';
+  else if (percentual > 80) progressColor = 'var(--accent)';
+
+  let html = '<div class="result-box ' + (idadeGest > c.gestMax ? 'danger' : 'normal') + '">' +
+    '<div class="result-label">' + c.emoji + ' IDADE GESTACIONAL</div>' +
+    '<div class="result-big">' + idadeGest + ' dias</div>' +
+    '<div class="result-sub">' + semanas + ' semanas e ' + diasResto + ' dias · ' + trimestre + '</div>' +
+    '</div>';
+
+  html += '<div class="card"><h3>📅 Datas</h3>' +
+    '<div style="font-size:13px;line-height:2;">' +
+    '<strong>Data da cobertura:</strong> ' + formatDate(dataCobertura) + '<br>' +
+    '<strong>Data provável do parto:</strong> ' + formatDate(dpp) + '<br>' +
+    '<strong>Janela de parto:</strong> ' + formatDate(dppMin) + ' — ' + formatDate(dppMax) + '<br>' +
+    '<strong>Dias restantes:</strong> ' + diasRestantes + ' dias<br>' +
+    (animalId ? '<strong>Animal:</strong> ' + escHtml(animalId) + '<br>' : '') +
+    (raca ? '<strong>Raça:</strong> ' + escHtml(raca) + '<br>' : '') +
+    '</div>' +
+    '<div class="progress-bar-container">' +
+    '<div class="progress-label"><span>0 dias</span><span>' + c.gestMedia + ' dias</span></div>' +
+    '<div class="progress-bar"><div class="progress-fill" style="width:' + percentual + '%;background:' + progressColor + '"></div>' +
+    '<div class="progress-text">' + percentual + '%</div></div></div></div>';
+
+  if (alertas.length > 0) {
+    html += alertas.map(a => '<div class="alert-box alert-' + a.tipo + '"><span class="alert-icon">' + a.icon + '</span><div>' + a.texto + '</div></div>').join('');
+  }
+
+  html += '<div class="card"><h3>📍 Marcos da Gestação</h3><div class="timeline">';
+  c.marcos.forEach(m => {
+    let cls = 'future';
+    if (idadeGest >= m.dia + 3) cls = 'past';
+    else if (idadeGest >= m.dia - 3) cls = 'current';
+    html += '<div class="tl-item ' + cls + '"><strong>Dia ' + m.dia + '</strong><small>' + m.texto + '</small></div>';
+  });
+  html += '</div></div>';
+
+  html += '<div class="btn-row">' +
+    '<button class="btn btn-outline" onclick="novoCalc()">Novo Cálculo</button>' +
+    '<button class="btn btn-primary" onclick="compartilharGest()">Compartilhar</button></div>';
+
+  document.getElementById('resultArea').innerHTML = html;
+  document.getElementById('resultArea').style.display = 'block';
+  document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
+
+  const record = {
+    id: Date.now(), date: new Date().toISOString(),
+    especie: currentSp, emoji: c.emoji, label: c.label,
+    idadeGest, diasRestantes, dpp: dpp.toISOString(), dataCobertura: dataCobertura.toISOString(),
+    animalId, raca, modo, percentual
+  };
+  history.unshift(record);
+  if (history.length > 50) history.pop();
+  try { localStorage.setItem('gestvet_history', JSON.stringify(history)); } catch(e) {}
+}
+
+function avaliarFC() {
+  const especie = document.getElementById('fcEspecie').value;
+  const fc = parseInt(document.getElementById('fcValor').value);
+  const idade = parseInt(document.getElementById('fcIdade').value);
+  if (!fc) { showToast('Insira a FC fetal'); return; }
+
+  const c = SP[especie];
+  let status, titulo, classe, detalhes, conduta;
+
+  if (fc < c.fcCritico) {
+    status = 'SOFRIMENTO FETAL GRAVE';
+    titulo = '🚨 BRADICARDIA SEVERA';
+    classe = 'danger';
+    detalhes = 'FC de ' + fc + ' bpm está abaixo do limiar crítico de ' + c.fcCritico + ' bpm para ' + c.label.toLowerCase() + '.';
+    conduta = getCondutaCritica(especie, fc, idade);
+  } else if (fc < c.fcMin) {
+    status = 'BRADICARDIA — ALERTA';
+    titulo = '⚠️ Bradicardia Fetal';
+    classe = 'warning';
+    detalhes = 'FC de ' + fc + ' bpm está abaixo do normal (' + c.fcMin + '–' + c.fcMax + ' bpm).';
+    conduta = getCondutaBradi(especie, fc, idade);
+  } else if (fc > c.fcMax) {
+    status = 'TAQUICARDIA';
+    titulo = '⚠️ Taquicardia Fetal';
+    classe = 'warning';
+    detalhes = 'FC de ' + fc + ' bpm está acima do normal (' + c.fcMin + '–' + c.fcMax + ' bpm).';
+    conduta = getCondutaTaqui(especie, fc, idade);
+  } else {
+    status = 'FC NORMAL';
+    titulo = '✅ Frequência Cardíaca Normal';
+    classe = 'success';
+    detalhes = 'FC de ' + fc + ' bpm está dentro da faixa normal (' + c.fcMin + '–' + c.fcMax + ' bpm).';
+    conduta = 'Manter acompanhamento de rotina. Reavaliar conforme protocolo gestacional.';
+  }
+
+  let html = '<div class="result-box ' + classe + '">' +
+    '<div class="result-label">AVALIAÇÃO FC FETAL — ' + c.emoji + ' ' + c.label.toUpperCase() + '</div>' +
+    '<div class="result-big">' + fc + ' bpm</div>' +
+    '<div class="result-sub">' + status + '</div></div>';
+
+  html += '<div class="card"><h3>' + titulo + '</h3>' +
+    '<p style="font-size:13px;margin-bottom:8px;">' + detalhes + '</p>';
+
+  if (idade) html += '<p style="font-size:12px;color:var(--muted);">Idade gestacional informada: <strong>' + idade + ' dias</strong></p>';
+
+  html += '<div class="alert-box alert-' + classe + '" style="margin-top:12px;">' +
+    '<span class="alert-icon">' + (classe === 'danger' ? '🏥' : classe === 'warning' ? '🩺' : '📋') + '</span>' +
+    '<div><strong>Conduta sugerida:</strong><br>' + conduta + '</div></div></div>';
+
+  html += '<div class="card"><h3>📊 Referência — ' + c.label + '</h3>' +
+    '<div class="fc-zones">' +
+    '<div class="fc-zone fc-brad"><val class="val">&lt;' + c.fcMin + '</val>Bradicardia</div>' +
+    '<div class="fc-zone fc-norm"><val class="val">' + c.fcMin + '–' + c.fcMax + '</val>Normal</div>' +
+    '<div class="fc-zone fc-tach"><val class="val">&gt;' + c.fcMax + '</val>Taquicardia</div>' +
+    '</div>' +
+    '<p style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;">Limiar crítico (sofrimento grave): &lt;' + c.fcCritico + ' bpm</p>' +
+    '</div>';
+
+  document.getElementById('fcResult').innerHTML = html;
+  document.getElementById('fcResult').style.display = 'block';
+  document.getElementById('fcResult').scrollIntoView({ behavior: 'smooth' });
+}
+
+function getCondutaCritica(especie, fc, idade) {
+  if (especie === 'cao') return 'Bradicardia persistente &lt;' + SP.cao.fcCritico + ' bpm é indicação de <strong>cesariana de emergência</strong>. Avaliar viabilidade fetal e condição materna. Preparar equipe cirúrgica imediatamente.';
+  if (especie === 'gato') return 'FC &lt;' + SP.gato.fcCritico + ' bpm indica sofrimento grave. <strong>Considerar cesariana de emergência.</strong> Avaliar contratilidade uterina e resposta à ocitocina.';
+  if (especie === 'equino') return 'Bradicardia fetal grave em equino. <strong>Monitoramento intensivo contínuo.</strong> Avaliar perfusão placentária (Doppler). Considerar indução ou cesariana conforme maturidade fetal.';
+  if (especie === 'bovino') return 'Sofrimento fetal grave. <strong>Avaliar necessidade de cesariana ou tração assistida.</strong> Verificar posição fetal e dilatação cervical.';
+  return 'Sofrimento fetal grave. <strong>Intervenção veterinária imediata.</strong> Avaliar viabilidade fetal e condições para parto assistido ou cesariana.';
+}
+
+function getCondutaBradi(especie, fc, idade) {
+  if (especie === 'cao' || especie === 'gato') return 'Repetir aferição em 15-30 minutos. Se persistente, avaliar progressão do parto. Bradicardia intermitente durante contrações pode ser fisiológica, mas <strong>persistente indica sofrimento</strong>. Preparar para possível intervenção.';
+  if (especie === 'equino') return 'Monitorar continuamente. Avaliar movimentação fetal e perfusão placentária. Considerar reposicionamento da égua. Repetir em 30 minutos.';
+  return 'Reavaliar em 30 minutos. Verificar hidratação e nutrição materna. Se persistente, considerar intervenção obstétrica. Monitorar sinais de distocia.';
+}
+
+function getCondutaTaqui(especie, fc, idade) {
+  if (especie === 'cao' || especie === 'gato') return 'Taquicardia pode indicar <strong>hipóxia fetal compensada, infecção ou estresse térmico</strong>. Avaliar temperatura materna, hidratação e sinais de infecção. Repetir em 30 minutos. Se evoluir para bradicardia, é sinal de descompensação.';
+  if (especie === 'equino') return 'Avaliar causas: febre materna, placentite, estresse. Monitorar evolução — taquicardia que evolui para bradicardia indica descompensação. Considerar tratamento de causas base.';
+  return 'Investigar causas: estresse térmico, infecção, desidratação materna. Tratar causa base. Monitorar evolução para bradicardia (descompensação). Reavaliar em 30-60 minutos.';
+}
+
+function updateFcZones() {
+  const especie = document.getElementById('fcEspecie').value;
+  const c = SP[especie];
+  document.getElementById('fcZonesRef').innerHTML =
+    '<div class="fc-zones">' +
+    '<div class="fc-zone fc-brad"><span class="val">&lt;' + c.fcMin + '</span>Bradicardia</div>' +
+    '<div class="fc-zone fc-norm"><span class="val">' + c.fcMin + '–' + c.fcMax + '</span>Normal</div>' +
+    '<div class="fc-zone fc-tach"><span class="val">&gt;' + c.fcMax + '</span>Taquicardia</div>' +
+    '</div>' +
+    '<p style="font-size:11px;color:var(--muted);margin:6px 0 12px;text-align:center;">Limiar crítico: &lt;' + c.fcCritico + ' bpm</p>';
+}
+
+function novoCalc() {
+  document.getElementById('resultArea').style.display = 'none';
+  document.getElementById('dataCobertura').value = '';
+  document.getElementById('animalId').value = '';
+  document.getElementById('nFilhotes').value = '';
+  document.getElementById('bioMedida').value = '';
+  document.getElementById('bioAnimalId').value = '';
+  document.getElementById('btnCalc').disabled = true;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function compartilharGest() {
+  const c = sp();
+  const res = document.getElementById('resultArea');
+  const text = c.emoji + ' GestVet — Cálculo Gestacional\n\n' + res.innerText.substring(0, 600) + '\n\n📱 App GestVet';
+  if (navigator.share) {
+    navigator.share({ title: 'GestVet', text }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(text).then(() => showToast('Copiado!')).catch(() => showToast('Não foi possível copiar'));
+  }
+}
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'hist') renderHistory();
+  if (name === 'fc') updateFcZones();
+}
+
+function renderHistory() {
+  const list = document.getElementById('histList');
+  if (history.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);"><p>Nenhum cálculo registrado</p></div>';
+    return;
+  }
+  list.innerHTML = history.map(h => {
+    const d = new Date(h.date);
+    return '<div class="history-item">' +
+      '<div class="history-icon">' + h.emoji + '</div>' +
+      '<div class="history-info"><strong>' + escHtml(h.animalId || h.label) + '</strong>' +
+      '<small>' + d.toLocaleDateString('pt-BR') + ' · ' + h.label + (h.raca ? ' · ' + h.raca : '') + '</small></div>' +
+      '<div class="history-val">' + h.idadeGest + 'd<br><span style="font-size:11px;color:var(--muted);font-weight:400;">' + h.percentual + '%</span></div></div>';
+  }).join('');
+  list.innerHTML += '<div style="padding:12px;text-align:center;"><button class="btn btn-outline btn-sm" onclick="clearHist()" style="width:auto;color:var(--danger);border-color:var(--danger);">Limpar Histórico</button></div>';
+}
+
+function clearHist() {
+  if (confirm('Limpar todo o histórico?')) {
+    history = [];
+    try { localStorage.setItem('gestvet_history', JSON.stringify(history)); } catch(e) {}
+    renderHistory();
+    showToast('Histórico limpo');
+  }
+}
+
+function formatDate(d) {
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', weekday: 'short' });
+}
+
+function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+populateRacas();
+populateBio();
+updateFcZones();
+</script>
+</body>
+</html>
